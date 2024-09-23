@@ -1,0 +1,1 @@
+# plugins-woo-floating-cart-lite
