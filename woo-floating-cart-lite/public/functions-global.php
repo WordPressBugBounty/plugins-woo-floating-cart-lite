@@ -310,7 +310,7 @@ function xt_woofc_checkout_link() {
     if ( $checkout_link_type == 'checkout' ) {
         $link = wc_get_checkout_url();
     } else {
-        $link = wc_get_cart_url();
+        $link = wc_get_page_permalink( 'cart' );
     }
     return apply_filters( 'xt_woofc_checkout_link', $link );
 }

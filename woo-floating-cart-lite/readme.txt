@@ -7,7 +7,7 @@ Author URI: https://www.xplodedthemes.com
 Tags: woocommerce cart, side cart, fly to cart, fly cart, woocommerce side cart, mini cart, floating cart, cart, ajax cart, ajax add to cart, related products, upsell, cross-sell
 Requires at least: 4.6
 Tested up to: 6.6
-Stable tag: 2.8.1
+Stable tag: 2.8.2
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -105,6 +105,9 @@ Installing "Floating Cart for WooCommerce" can be done by following these steps:
 3. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+#### V.2.8.2 - 03.11.2024
+- **fix**: Fixed issue with Cart redirect button
 
 #### V.2.8.1 - 14.09.2024
 - **update**: Freemius SDK update v2.8.0
