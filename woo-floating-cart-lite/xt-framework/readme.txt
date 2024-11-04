@@ -16,6 +16,10 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.5.3 - 04.11.2024
+- **update**: Freemius SDK update v2.9.0
+- **support**: Fixed deprecated code causing "Creation of dynamic property" log errors in PHP 8.2
+
 #### V.2.5.2 - 14.09.2024
 - **update**: Freemius SDK update v2.8.0
 - **fix**: Security fixes

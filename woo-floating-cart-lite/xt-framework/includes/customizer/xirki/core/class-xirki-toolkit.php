@@ -20,6 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Xirki_Toolkit {
 
+    public $modules;
+
 	/**
 	 * Holds the one, true instance of this object.
 	 *

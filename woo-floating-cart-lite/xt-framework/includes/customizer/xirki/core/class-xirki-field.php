@@ -230,6 +230,15 @@ class Xirki_Field {
 	 */
 	protected $partial_refresh = array();
 
+    // Newly added attributes based on your error log
+    public $label = ''; // Adding public properties to avoid dynamic creation
+    public $description = '';
+    public $desc = '';
+    public $screen = '';
+    public $row_label = ''; // for Xirki_Field_Repeater
+    public $modules = ''; // for Xirki_Toolkit
+    public $hidden_screens = ''; // for Xirki_Toolkit
+
 	/**
 	 * The class constructor.
 	 * Parses and sanitizes all field arguments.
