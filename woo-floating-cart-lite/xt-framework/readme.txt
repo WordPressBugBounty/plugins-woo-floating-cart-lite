@@ -16,6 +16,12 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.5.5 - 10.03.2025
+- **fix**: Minor CSS fixed within the customizer panels
+
+#### V.2.5.4 - 04.11.2024
+- **security**: Removed SVG upload support for security reasons. To enable SVG uploads, please use a plugin like "Safe SVG" https://wordpress.org/plugins/safe-svg/
+
 #### V.2.5.3 - 04.11.2024
 - **update**: Freemius SDK update v2.9.0
 - **support**: Fixed deprecated code causing "Creation of dynamic property" log errors in PHP 8.2

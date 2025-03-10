@@ -88,7 +88,6 @@ if(!class_exists('XT_Framework_Customizer')) {
             add_action( 'customize_preview_init', array( $this, 'customizer_preview_assets' ) );
             add_action( 'customize_controls_enqueue_scripts', array( $this, 'customizer_controls_assets' ) );
 
-            add_filter( 'upload_mimes', array( $this, 'allow_myme_types'), 1, 1 );
             add_filter( 'wp_check_filetype_and_ext', array( $this, 'check_filetype_and_ext'), 10, 4 );
 
             add_filter('body_class', array( $this, 'customizer_preview_class'), 1, 1);
@@ -1005,18 +1004,6 @@ if(!class_exists('XT_Framework_Customizer')) {
 
         }
 
-        /**
-         * @param $mime_types
-         * @return mixed
-         */
-        public function allow_myme_types($mime_types ) {
-
-            $mime_types['svg']  = 'image/svg+xml'; //Adding svg extension
-            $mime_types['svgz'] = 'image/svg+xml';
-
-            return $mime_types;
-
-        }
 
     } // End Class
 

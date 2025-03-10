@@ -18,10 +18,13 @@
 
 	.accordion-section-title {
 		color: #181818;
+		padding-left: 10px !important;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 
 		> .dashicons,
 		&:before {
-			margin-right: 10px;
 			color: #bd043d;
 			height: initial;
 		}

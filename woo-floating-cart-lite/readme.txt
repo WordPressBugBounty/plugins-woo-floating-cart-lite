@@ -6,8 +6,8 @@ Author: XplodedThemes
 Author URI: https://www.xplodedthemes.com
 Tags: woocommerce cart, side cart, fly to cart, fly cart, woocommerce side cart, mini cart, floating cart, cart, ajax cart, ajax add to cart, related products, upsell, cross-sell
 Requires at least: 4.6
-Tested up to: 6.6
-Stable tag: 2.8.3
+Tested up to: 6.7
+Stable tag: 2.8.5
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -106,9 +106,17 @@ Installing "Floating Cart for WooCommerce" can be done by following these steps:
 
 == Changelog ==
 
+#### V.2.8.5 - 10.03.2025
+- **fix**: Minor CSS fixed within the customizer panels
+
+#### V.2.8.4 - 04.11.2024
+- **security**: Removed SVG upload support for security reasons. To enable SVG uploads, please use a plugin like "Safe SVG" https://wordpress.org/plugins/safe-svg/
+- **update**: XT Framework update
+
 #### V.2.8.3 - 04.11.2024
 - **update**: Freemius SDK update v2.9.0
 - **support**: Fixed deprecated code causing "Creation of dynamic property" log errors in PHP 8.2
+- **update**: XT Framework update
 
 #### V.2.8.2 - 03.11.2024
 - **fix**: Fixed issue with Cart redirect button
