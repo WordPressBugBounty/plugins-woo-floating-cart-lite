@@ -214,7 +214,7 @@
 				cart.maybeShowNotice();
 			});
 
-			$(document.body).on('vclick', cart.el.notice, (evt) => {
+			$(document.body).on('pointerdown', cart.el.notice, (evt) => {
 
 				if($(evt.currentTarget).find('a').length === 0) {
 					cart.hideNotice();
@@ -231,7 +231,7 @@
 
 			cart.triggers.forEach((trigger, i) => {
 
-				const selector = i === 0 ? 'vclick' : 'click';
+				const selector = i === 0 ? 'pointerdown' : 'click';
 
 				$(document.body).on(selector, trigger, (evt) => {
 					if($(cart.el.container).is(':visible')) {
@@ -264,14 +264,14 @@
 			});
 
 			//close cart when clicking on the .xt_woofc::before (bg layer)
-			$$(cart.el.container).on('vclick', (evt) => {
+			$$(cart.el.container).on('pointerdown', (evt) => {
 				if( evt.target === evt.currentTarget ) {
 					cart.toggleCart(false);
 				}
 			});
 
 			//delete an item from the cart
-			$$(cart.el.body).on('vclick', '.xt_woofc-delete-item', (evt) => {
+			$$(cart.el.body).on('pointerdown', '.xt_woofc-delete-item', (evt) => {
 				evt.preventDefault();
 
 				// Simulate native cart remove to keep analytics / tracking plugins working as they should
@@ -331,7 +331,7 @@
 			});
 
 			let quantityChangeTimeout;
-			$( document ).on( 'vclick', '.xt_woofc-quantity-col-minus, .xt_woofc-quantity-col-plus', (evt) => {
+			$( document ).on( 'pointerdown', '.xt_woofc-quantity-col-minus, .xt_woofc-quantity-col-plus', (evt) => {
 
 				evt.preventDefault();
 
@@ -407,7 +407,7 @@
 
 
 			//reinsert item deleted from the cart
-			$(document.body).on('vclick', '.xt_woofc-undo', (evt) => {
+			$(document.body).on('pointerdown', '.xt_woofc-undo', (evt) => {
 
 				if(cart.undoTimeoutId) {
 					clearInterval(cart.undoTimeoutId);
@@ -484,7 +484,7 @@
 				cart.refreshCart();
 			});
 
-			$(document).on('vclick', cart.el.checkoutButton, (evt) => {
+			$(document).on('pointerdown', cart.el.checkoutButton, (evt) => {
 
 				if(cart.isLoading) {
 					evt.preventDefault();

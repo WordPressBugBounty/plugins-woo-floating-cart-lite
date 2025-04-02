@@ -78,7 +78,7 @@ function xt_woofc_attributes() {
         'data-position'        => xt_woofc_option( 'position', 'bottom-right' ),
         'data-tablet-position' => xt_woofc_option( 'position_tablet', 'bottom-right' ),
         'data-mobile-position' => xt_woofc_option( 'position_mobile', 'bottom-right' ),
-        'data-trigger-event'   => xt_woofc_option( 'trigger_event_type', 'vclick' ),
+        'data-trigger-event'   => xt_woofc_option( 'trigger_event_type', 'pointerdown' ),
         'data-hoverdelay'      => xt_woofc_option( 'trigger_hover_delay', 0 ),
         'data-loadingtimeout'  => xt_woofc_option( 'loading_timeout', 100 ),
     );

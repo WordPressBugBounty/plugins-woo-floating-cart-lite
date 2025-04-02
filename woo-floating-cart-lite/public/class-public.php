@@ -166,7 +166,6 @@ class XT_Woo_Floating_Cart_Public
             $this->core->plugin_url('public/assets/js', 'frontend' . XTFW_SCRIPT_SUFFIX . '.js'),
             array(
                 'jquery',
-                'xt-jquery-touch',
                 'xt-jquery-ajaxqueue'
             ),
             $this->core->plugin_version(),

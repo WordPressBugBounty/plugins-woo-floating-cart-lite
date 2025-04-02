@@ -12,7 +12,7 @@
  * Plugin URI:  https://xplodedthemes.com/products/woo-floating-cart/
  * Description: An Interactive Side Cart / Floating Cart for WooCommerce that slides in when the user decides to buy an item. Fully customizable right from WordPress Customizer with Live Preview. Products, quantities and prices are updated instantly via Ajax.
  * Tags: woocommerce cart, floating cart, site cart, mini cart, interactive cart, cart
- * Version:     2.8.5
+ * Version:     2.8.6
  * WC requires at least: 3.0.0
  * WC tested up to: 9.7
  * Author:      XplodedThemes
@@ -36,7 +36,7 @@ $market = ( strpos( $market, 'XT_MARKET' ) !== false ) ? 'freemius' : $market;
 $market = ( defined( 'XT_MARKET' ) ) ? XT_MARKET : $market;
 
 $xt_woofc_plugin = array(
-	'version'      => '2.8.5',
+	'version'      => '2.8.6',
 	'name'         => 'Floating Cart for WooCommerce',
 	'menu_name'    => 'Floating Cart',
 	'url'          => 'https://xplodedthemes.com/products/woo-floating-cart/',

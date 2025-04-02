@@ -19,10 +19,10 @@ $fields[] = array(
     'label'           => esc_html__( 'Cart Trigger Event Type', 'woo-floating-cart' ),
     'type'            => 'radio-buttonset',
     'choices'         => array(
-        'vclick'     => esc_attr__( 'Click Only', 'woo-floating-cart' ),
-        'mouseenter' => esc_attr__( 'Mouse Over Or Click', 'woo-floating-cart' ),
+        'pointerdown' => esc_attr__( 'Click Only', 'woo-floating-cart' ),
+        'mouseenter'  => esc_attr__( 'Mouse Over Or Click', 'woo-floating-cart' ),
     ),
-    'default'         => 'vclick',
+    'default'         => 'pointerdown',
     'priority'        => 10,
     'active_callback' => array(array(
         'setting'  => 'trigger_hidden',
