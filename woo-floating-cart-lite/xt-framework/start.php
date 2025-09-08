@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-$this_fw_version = '2.5.5';
+$this_fw_version = '2.5.6';
 
 /**
  * Special logic to make sure that every XT plugin framework

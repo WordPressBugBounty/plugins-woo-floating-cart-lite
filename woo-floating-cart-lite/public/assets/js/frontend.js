@@ -484,7 +484,7 @@
 				cart.refreshCart();
 			});
 
-			$(document).on('pointerdown', cart.el.checkoutButton, (evt) => {
+			$(document).on('click', cart.el.checkoutButton, (evt) => {
 
 				if(cart.isLoading) {
 					evt.preventDefault();

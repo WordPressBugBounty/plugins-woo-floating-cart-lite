@@ -16,6 +16,9 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.5.6 - 08.09.2025
+- **update**: Freemius SDK update v2.12.1
+
 #### V.2.5.5 - 10.03.2025
 - **fix**: Minor CSS fixed within the customizer panels
 
