@@ -231,9 +231,7 @@
 
 			cart.triggers.forEach((trigger, i) => {
 
-				const selector = i === 0 ? 'pointerdown' : 'click';
-
-				$(document.body).on(selector, trigger, (evt) => {
+				$(document.body).on('click', trigger, (evt) => {
 					if($(cart.el.container).is(':visible')) {
 						evt.preventDefault();
 						evt.stopPropagation();
