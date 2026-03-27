@@ -45,6 +45,7 @@ if(!class_exists('XT_Framework_Customizer')) {
         /**
          * Class constructor
          * @param $core
+         * @param null $module
          */
         public function __construct( $core, $module = null ) {
 
@@ -54,6 +55,7 @@ if(!class_exists('XT_Framework_Customizer')) {
             $this->is_module = !empty($module);
 
             add_filter( 'xirki_telemetry', '__return_false', 1 );
+            add_filter( 'init', array($this, 'init'), 1 );
 
             require_once XTFW_DIR_CUSTOMIZER . '/class-customizer-helpers.php';
             require_once XTFW_DIR_CUSTOMIZER . '/class-customizer-options.php';
@@ -61,7 +63,6 @@ if(!class_exists('XT_Framework_Customizer')) {
 
             $this->set_config_id();
             $this->hooks();
-            $this->init();
         }
 
         /**

@@ -336,6 +336,7 @@ abstract class XT_Framework {
             }
             do_action( 'xtfw_plugins_loaded' );
         }, 999 );
+        add_action( 'init', array($this, 'init') );
         return $this;
     }
 
@@ -373,6 +374,9 @@ abstract class XT_Framework {
             $this->load_framework();
             $this->load_plugin();
         }
+    }
+
+    public function init() {
     }
 
     /**
@@ -1905,7 +1909,7 @@ abstract class XT_Framework {
      * @since     1.0.4
      */
     public function plugin_data( $id = null ) {
-        $data = get_plugin_data( $this->plugin_file() );
+        $data = get_plugin_data( $this->plugin_file(), false, false );
         if ( !empty( $id ) ) {
             return ( !empty( $data[$id] ) ? $data[$id] : null );
         }

@@ -559,7 +559,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                         <img src="<?php echo esc_url( xtfw_dir_url( XTFW_DIR_ADMIN_TABS_ASSETS ) ); ?>/images/markets/<?php echo esc_attr( $instance->market() ); ?>.svg" class="xtfw-market-logo xtfw-market-<?php echo esc_attr( $instance->market() ) ?>"/>
                                     </td>
                                     <td class="requirement-value align-right">
-                                        <?php echo wp_kses_post($instance->plugin_tabs()->render_header_badges( false )); ?>
+                                        <?php $instance->plugin_tabs()->render_header_badges( false ); ?>
                                     </td>
                                 </tr>
 
