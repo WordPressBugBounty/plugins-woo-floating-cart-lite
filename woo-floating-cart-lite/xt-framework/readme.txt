@@ -16,6 +16,23 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.5.13 - 16.07.2026
+- **build**: Preserved generated Freemius pricing and Xirki vendor assets during framework synchronization.
+
+#### V.2.5.12 - 14.07.2026
+- **update**: Updated the bundled Freemius SDK to the stable v2.13.4 release.
+
+#### V.2.5.11 - 14.07.2026
+- **security**: Hardened framework admin actions, redirects, remote requests, settings persistence, and dynamic output.
+- **compliance**: Moved framework-generated inline scripts and styles to WordPress enqueue APIs.
+- **fix**: Preserved trusted Freemius account and checkout templates so their forms and SDK scripts render correctly inside XT admin tabs.
+- **support**: Improved PHP and modern WordPress compatibility in the bundled Xirki customizer layer.
+
+#### V.2.5.10 - 27.03.2026
+- **new**: Added a new `editor` settings field with `wp_editor()` support.
+- **support**: Added settings sanitization and conditional handling for editor fields.
+- **enhance**: Refined admin settings and tabs styling.
+
 #### V.2.5.8 - 24.03.2026
 - **update**: Freemius SDK update v2.13.0
 

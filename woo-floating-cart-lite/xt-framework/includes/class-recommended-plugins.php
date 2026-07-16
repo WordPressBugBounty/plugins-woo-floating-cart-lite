@@ -250,13 +250,8 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
                     }, 10, 3);
                 }
 
-                // Avoid weird error trigger: Undefined property: stdClass::$plugin in wp-includes/class-wp-list-util.php on line 166.
-                add_filter("site_transient_update_plugins", '__return_false', 10, 2);
-
                 $wp_list_table = _get_list_table('WP_Plugin_Install_List_Table');
                 $wp_list_table->prepare_items();
-
-                remove_filter("site_transient_update_plugins", '__return_false', 10);
 
                 return $wp_list_table;
 

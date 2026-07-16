@@ -62,6 +62,16 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( !defined( 'WPINC' ) ) {
     die;
 }
+/**
+ * Static packaging scope used by non-Freemius distributions.
+ *
+ * Freemius strips the marker method and every guarded call from the generated
+ * WordPress.org package. Full source and non-Freemius premium builds retain it
+ * so their local access manager continues to initialize normally.
+ */
+final class XT_Framework_Package_Scope {
+}
+
 abstract class XT_Framework {
     /**
      * Var that holds an array of all instances instances loaded
@@ -711,6 +721,7 @@ abstract class XT_Framework {
             );
             $this->access_manager->add_filter( 'checkout/purchaseCompleted', array($this, 'after_purchase_js') );
             $this->access_manager->add_filter( 'templates/checkout.php', array($this, 'checkout_gtm_script') );
+            add_action( 'admin_enqueue_scripts', array($this, 'enqueue_checkout_gtm_script') );
             $this->access_manager->add_filter( 'freemius_pricing_js_path', array($this, 'pricing_js_path') );
             $this->access_manager->add_filter( 'hide_freemius_powered_by', '__return_true' );
             $this->access_manager->add_filter( 'hide_billing_and_payments_info', '__return_true' );
@@ -726,12 +737,13 @@ abstract class XT_Framework {
             // Signal that Freemius SDK was initiated.
             do_action( $this->plugin_short_prefix( 'fs_loaded' ) );
         } else {
-            $this->access_manager = $this->local_access_manager();
+            $this->access_manager = new XT_Framework_Package_Scope();
         }
     }
 
     public function is_submenu_visible( $is_visible, $menu_id ) {
-        $page = ( !empty( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : '' );
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only menu routing.
+        $page = ( !empty( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '' );
         $is_admin_tab = !empty( $page ) && strpos( $page, $this->plugin_slug() ) !== false;
         if ( !$is_admin_tab ) {
             $is_visible = false;
@@ -743,6 +755,8 @@ abstract class XT_Framework {
     }
 
     public function after_purchase_js() {
+        $plugin_name = wp_json_encode( $this->plugin_name() );
+        $product_id = absint( $this->market_product()->id );
         return 'function ( data ) {
                     
                  /**
@@ -760,8 +774,8 @@ abstract class XT_Framework {
                 var currency = data && data.currency ? data.currency.toUpperCase() : "USD";
 
                 var item = {
-                    item_name: "' . $this->plugin_name() . '",
-                    item_id: ' . $this->market_product()->id . ',
+                    item_name: ' . $plugin_name . ',
+                    item_id: ' . $product_id . ',
                     item_brand: "XplodedThemes",
                     affiliation: "XplodedThemes",
                     price: data.total,
@@ -791,7 +805,35 @@ abstract class XT_Framework {
     }
 
     public function checkout_gtm_script( $html ) {
-        return "\n        <script>window.dataLayer = window.dataLayer || [];</script>\n        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':\n        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],\n        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=\n        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);\n        })(window,document,'script','dataLayer', '" . XTFW_GTM_ID . "');</script>\n        " . $html;
+        return $html;
+    }
+
+    /**
+     * Enqueue Google Tag Manager only inside the user-initiated Freemius checkout.
+     *
+     * @return void
+     */
+    public function enqueue_checkout_gtm_script() {
+        if ( empty( $this->access_manager ) || !$this->access_manager->is_admin_page( 'pricing' ) ) {
+            return;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only checkout routing.
+        $checkout = ( isset( $_GET['checkout'] ) && is_scalar( $_GET['checkout'] ) ? sanitize_text_field( wp_unslash( $_GET['checkout'] ) ) : '' );
+        if ( 'true' !== $checkout ) {
+            return;
+        }
+        $handle = 'xtfw-google-tag-manager';
+        $src = add_query_arg( 'id', rawurlencode( XTFW_GTM_ID ), 'https://www.googletagmanager.com/gtm.js' );
+        wp_register_script(
+            $handle,
+            $src,
+            array(),
+            null,
+            false
+        );
+        wp_script_add_data( $handle, 'strategy', 'async' );
+        wp_add_inline_script( $handle, "window.dataLayer = window.dataLayer || []; window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});", 'before' );
+        wp_enqueue_script( $handle );
     }
 
     public function pricing_js_path() {
@@ -805,21 +847,6 @@ abstract class XT_Framework {
      * @since    1.0.0
      */
     protected abstract function freemius_access_manager();
-
-    /**
-     * Load Local Access Manager
-     *
-     * @return XT_Framework_Access_Manager
-     * @since    1.0.0
-     */
-    private function local_access_manager() {
-        require_once $this->plugin_framework_path( 'includes/license/includes', 'class-license.php' );
-        require_once $this->plugin_framework_path( 'includes/license/includes', 'class-access-manager.php' );
-        require_once $this->plugin_framework_path( 'includes/license/includes', 'plugin-update-checker/plugin-update-checker.php' );
-        require_once $this->plugin_framework_path( 'includes/license/includes', 'class-plugin-updater.php' );
-        // Init License Manager
-        return new XT_Framework_Access_Manager($this);
-    }
 
     /**
      * Plugin base hooks to handle activation, deactivation and uninstall
@@ -1197,7 +1224,8 @@ abstract class XT_Framework {
      * @since     1.0.0
      */
     public function framework_is_admin_url( $slug = '' ) {
-        $page = ( !empty( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : '' );
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin routing.
+        $page = ( !empty( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '' );
         return $page === $this->framework_slug( $slug );
     }
 
@@ -1453,8 +1481,10 @@ abstract class XT_Framework {
      * @since     1.0.0
      */
     public function plugin_is_admin_url( $slug = '', $tab = '' ) {
-        $_page = ( !empty( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : '' );
-        $_tab = ( !empty( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : '' );
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin routing.
+        $_page = ( !empty( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '' );
+        $_tab = ( !empty( $_GET['tab'] ) && is_scalar( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '' );
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
         return empty( $tab ) && $_page === $this->plugin_slug( $slug ) || $tab === $_tab && $_page === $this->plugin_slug( $slug );
     }
 
@@ -2269,6 +2299,7 @@ abstract class XT_Framework {
      * @since 1.0.0
      */
     public function __clone() {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core diagnostic API handles the translated message.
         _doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'xt-framework' ), $this->framework_version() );
     }
 
@@ -2279,6 +2310,7 @@ abstract class XT_Framework {
      * @since 1.0.0
      */
     public function __wakeup() {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core diagnostic API handles the translated message.
         _doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'xt-framework' ), $this->framework_version() );
     }
 

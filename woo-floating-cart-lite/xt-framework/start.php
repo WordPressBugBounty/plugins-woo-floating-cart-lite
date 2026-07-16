@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-$this_fw_version = '2.5.9';
+$this_fw_version = '2.5.13';
 
 /**
  * Special logic to make sure that every XT plugin framework
@@ -163,7 +163,8 @@ if ( ! isset( $xtfw_active_plugins->newest ) ) {
 
         if(empty($network_activated_plugins)) {
 
-            xtfw_redirect( $_SERVER['REQUEST_URI'] );
+            $request_uri = isset( $_SERVER['REQUEST_URI'] ) && is_scalar( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : admin_url();
+            xtfw_redirect( wp_validate_redirect( $request_uri, admin_url() ) );
         }
     }
 
@@ -213,7 +214,8 @@ if ( ! isset( $xtfw_active_plugins->newest ) ) {
             if ( xtfw_newest_fw_plugin_first() ) {
                 // Refresh page after re-order to make sure activated plugin loads newest FW.
                 if ( class_exists( 'XT_Framework' ) ) {
-                    xtfw_redirect( $_SERVER['REQUEST_URI'] );
+                    $request_uri = isset( $_SERVER['REQUEST_URI'] ) && is_scalar( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : admin_url();
+                    xtfw_redirect( wp_validate_redirect( $request_uri, admin_url() ) );
                 }
             }
         }

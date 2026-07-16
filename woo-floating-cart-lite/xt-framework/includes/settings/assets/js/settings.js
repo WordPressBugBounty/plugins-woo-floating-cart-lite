@@ -190,8 +190,8 @@
                 return $element.filter(':checked').val();
             }
 
-            if(field.type === 'textarea') {
-                return $element.html();
+            if(field.type === 'textarea' || field.type === 'editor') {
+                return $element.val();
             }
 
             return $element.val();
@@ -217,6 +217,7 @@
                 'url',
                 'tel',
                 'textarea',
+                'editor',
                 'select',
                 'multiselect',
                 'image',
@@ -496,7 +497,8 @@
 
             var data = {
                 action: process_action,
-                action_id: action_id
+                action_id: action_id,
+                _wpnonce: xtfw_settings.nonce
             };
 
             if($button.data('data')) {

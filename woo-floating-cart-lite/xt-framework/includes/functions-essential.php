@@ -550,7 +550,7 @@ function xtfw_print_queued_js()
         $xtfw_queued_js = preg_replace('/&#(x)?0*(?(1)27|39);?/i', "'", $xtfw_queued_js);
         $xtfw_queued_js = str_replace("\r", '', $xtfw_queued_js);
 
-        $js = "<!-- XT Framework JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) { $xtfw_queued_js });\n</script>\n";
+        $js = "jQuery(function($) { $xtfw_queued_js });";
 
         /**
          * Queued jsfilter.
@@ -559,9 +559,16 @@ function xtfw_print_queued_js()
          *
          * @since 21.0.0
          */
-        echo apply_filters('xtfw_queued_js', $js);
+        $js = apply_filters('xtfw_queued_js', $js);
+
+        $handle = 'xtfw-queued-js';
+        $version = defined( 'XTFW_VERSION' ) ? XTFW_VERSION : null;
+
+        wp_register_script( $handle, false, array( 'jquery' ), $version, true );
+        wp_add_inline_script( $handle, trim( $js ) );
+        wp_enqueue_script( $handle );
     }
 }
 
-add_action('admin_footer', 'xtfw_print_queued_js', 99999);
-add_action('wp_footer', 'xtfw_print_queued_js', 99999);
+add_action('admin_print_footer_scripts', 'xtfw_print_queued_js', 1);
+add_action('wp_print_footer_scripts', 'xtfw_print_queued_js', 1);

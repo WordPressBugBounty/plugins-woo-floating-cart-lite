@@ -370,8 +370,11 @@ class Xirki_Init {
 	 * @return void
 	 */
 	public function dismiss_nag() {
-		if ( isset( $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'xirki-dismiss-nag' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			if ( get_current_user_id() && isset( $_GET['dismiss-nag'] ) && 'font-awesome-xirki' === $_GET['dismiss-nag'] ) {
+		$nonce = isset( $_GET['nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['nonce'] ) ) : '';
+		$dismiss_nag = isset( $_GET['dismiss-nag'] ) ? sanitize_key( wp_unslash( $_GET['dismiss-nag'] ) ) : '';
+
+		if ( current_user_can( 'install_plugins' ) && wp_verify_nonce( $nonce, 'xirki-dismiss-nag' ) ) {
+			if ( get_current_user_id() && 'font-awesome-xirki' === $dismiss_nag ) {
 				update_user_meta( get_current_user_id(), 'xirki_fa_nag_dismissed', true );
 			}
 		}

@@ -44,6 +44,7 @@ final class Xirki_Modules_Telemetry {
 		}
 
 		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_action( 'admin_notices', array( $this, 'admin_notice' ) );
 	}
 
@@ -137,7 +138,7 @@ final class Xirki_Modules_Telemetry {
 	public function admin_notice() {
 
 		// Early exit if the user has dismissed the consent, or if they have opted-in.
-		if ( get_option( 'xirki_telemetry_no_consent' ) || get_option( 'xirki_telemetry_optin' ) ) {
+		if ( ! current_user_can( 'manage_options' ) || ! $this->should_display_notice() ) {
 			return;
 		}
 		$data = $this->get_data();
@@ -190,22 +191,47 @@ final class Xirki_Modules_Telemetry {
 			</table>
 			<p class="actions">
 
-				<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'xirki-consent-notice', 'telemetry' ) ) ); ?>" class="button button-primary consent"><?php esc_html_e( 'I agree', 'xirki' ); ?></a>
-				<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'xirki-hide-notice', 'telemetry' ) ) ); ?>" class="button button-secondary dismiss"><?php esc_html_e( 'No thanks', 'xirki' ); ?></a>
+				<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'xirki-consent-notice', 'telemetry' ), 'xirki-telemetry-consent' ) ); ?>" class="button button-primary consent"><?php esc_html_e( 'I agree', 'xirki' ); ?></a>
+				<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'xirki-hide-notice', 'telemetry' ), 'xirki-telemetry-dismiss' ) ); ?>" class="button button-secondary dismiss"><?php esc_html_e( 'No thanks', 'xirki' ); ?></a>
 				<a class="button button-link details details-show"><?php esc_html_e( 'Show me the data', 'xirki' ); ?></a>
 				<a class="button button-link details details-hide hidden"><?php esc_html_e( 'Collapse data', 'xirki' ); ?></a>
 			</p>
-			<script>
-			jQuery( '.xirki-telemetry a.details' ).on( 'click', function() {
-				jQuery( '.xirki-telemetry .data-to-send' ).toggleClass( 'hidden' );
-				jQuery( '.xirki-telemetry a.details-show' ).toggleClass( 'hidden' );
-				jQuery( '.xirki-telemetry a.details-hide' ).toggleClass( 'hidden' );
-			});
-			</script>
 		</div>
 		<?php
+	}
 
-		$this->table_styles();
+	/**
+	 * Enqueue the consent-notice script and styles through WordPress APIs.
+	 *
+	 * @return void
+	 */
+	public function enqueue_admin_assets() {
+
+		if ( ! current_user_can( 'manage_options' ) || ! $this->should_display_notice() ) {
+			return;
+		}
+
+		wp_enqueue_script( 'jquery' );
+		wp_add_inline_script(
+			'jquery',
+			"jQuery(function($){ $('.xirki-telemetry a.details').on('click', function(){ $('.xirki-telemetry .data-to-send, .xirki-telemetry a.details-show, .xirki-telemetry a.details-hide').toggleClass('hidden'); }); });"
+		);
+
+		wp_register_style( 'xirki-telemetry', false, array(), XIRKI_VERSION );
+		wp_enqueue_style( 'xirki-telemetry' );
+		wp_add_inline_style(
+			'xirki-telemetry',
+			'.data-to-send{border-spacing:0;width:100%;clear:both}.data-to-send *{word-wrap:break-word}.data-to-send a,.data-to-send button.button-link{text-decoration:none}.data-to-send td,.data-to-send th{padding:8px 10px}.data-to-send thead th,.data-to-send thead td{border-bottom:1px solid #e1e1e1}.data-to-send tfoot th,.data-to-send tfoot td{border-top:1px solid #e1e1e1;border-bottom:none}.data-to-send .no-items td{border-bottom-width:0}.data-to-send td{vertical-align:top}.data-to-send td,.data-to-send td p,.data-to-send td ol,.data-to-send td ul{font-size:13px;line-height:1.5em}.data-to-send th,.data-to-send thead td,.data-to-send tfoot td{text-align:left;line-height:1.3em;font-size:14px}.data-to-send th input,.updates-table td input,.data-to-send thead td input,.data-to-send tfoot td input{margin:0 0 0 8px;padding:0;vertical-align:text-top}'
+		);
+	}
+
+	/**
+	 * Whether the telemetry consent notice should be displayed.
+	 *
+	 * @return bool
+	 */
+	private function should_display_notice() {
+		return ! get_option( 'xirki_telemetry_no_consent' ) && ! get_option( 'xirki_telemetry_optin' );
 	}
 
 	/**
@@ -263,10 +289,10 @@ final class Xirki_Modules_Telemetry {
 	private function dismiss_notice() {
 
 		// Check if this is the request we want.
-		if ( isset( $_GET['_wpnonce'] ) && isset( $_GET['xirki-hide-notice'] ) ) {
+		if ( current_user_can( 'manage_options' ) && isset( $_GET['_wpnonce'] ) && isset( $_GET['xirki-hide-notice'] ) ) {
 			if ( 'telemetry' === sanitize_text_field( wp_unslash( $_GET['xirki-hide-notice'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 				// Check the wp-nonce.
-				if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) ) ) {
+				if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'xirki-telemetry-dismiss' ) ) {
 					// All good, we can save the option to dismiss this notice.
 					update_option( 'xirki_telemetry_no_consent', true );
 				}
@@ -284,10 +310,10 @@ final class Xirki_Modules_Telemetry {
 	private function consent() {
 
 		// Check if this is the request we want.
-		if ( isset( $_GET['_wpnonce'] ) && isset( $_GET['xirki-consent-notice'] ) ) {
+		if ( current_user_can( 'manage_options' ) && isset( $_GET['_wpnonce'] ) && isset( $_GET['xirki-consent-notice'] ) ) {
 			if ( 'telemetry' === sanitize_text_field( wp_unslash( $_GET['xirki-consent-notice'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 				// Check the wp-nonce.
-				if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) ) ) {
+				if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'xirki-telemetry-consent' ) ) {
 					// All good, we can save the option to dismiss this notice.
 					update_option( 'xirki_telemetry_optin', true );
 				}
@@ -295,33 +321,4 @@ final class Xirki_Modules_Telemetry {
 		}
 	}
 
-	/**
-	 * Prints the table styles.
-	 *
-	 * Normally we'd just use the .widefat CSS class for the table,
-	 * however apparently there's an obscure bug in WP causing this: https://xplodedthemes.com/issues/2067
-	 * This CSS is a copy of some styles from common.css in wp-core.
-	 *
-	 * @access private
-	 * @since 3.0.37
-	 * @return void
-	 */
-	private function table_styles() {
-		?>
-		<style>
-			/* .widefat - main style for tables */
-			.data-to-send { border-spacing: 0; width: 100%; clear: both; }
-			.data-to-send * { word-wrap: break-word; }
-			.data-to-send a, .data-to-send button.button-link { text-decoration: none; }
-			.data-to-send td, .data-to-send th { padding: 8px 10px; }
-			.data-to-send thead th, .data-to-send thead td { border-bottom: 1px solid #e1e1e1; }
-			.data-to-send tfoot th, .data-to-send tfoot td { border-top: 1px solid #e1e1e1; border-bottom: none; }
-			.data-to-send .no-items td { border-bottom-width: 0; }
-			.data-to-send td { vertical-align: top; }
-			.data-to-send td, .data-to-send td p, .data-to-send td ol, .data-to-send td ul { font-size: 13px; line-height: 1.5em; }
-			.data-to-send th, .data-to-send thead td, .data-to-send tfoot td { text-align: left; line-height: 1.3em; font-size: 14px; }
-			.data-to-send th input, .updates-table td input, .data-to-send thead td input, .data-to-send tfoot td input { margin: 0 0 0 8px; padding: 0; vertical-align: text-top; }
-		</style>
-		<?php
-	}
 }

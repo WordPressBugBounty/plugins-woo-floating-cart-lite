@@ -142,14 +142,19 @@ if ( ! class_exists( 'XT_Framework_Review_Notice' ) ) {
 
         public function ajax_plugin_rate_action() {
 
-            // Continue only if the nonce is correct
-            $nonce = sanitize_text_field($_REQUEST['_nonce']);
+            $capability = $this->core->plugin_dependencies()->depends_on( 'WooCommerce' ) ? 'manage_woocommerce' : 'manage_options';
 
-            if ( ! wp_verify_nonce( $nonce, $this->core->plugin_short_prefix('wp_rate_action_nonce') ) ) {
-                wp_send_json_error();
+            if ( ! current_user_can( $capability ) ) {
+                wp_send_json_error( array( 'message' => esc_html__( 'You are not allowed to dismiss this notice.', 'xt-framework' ) ), 403 );
             }
 
-            $rate_action = sanitize_text_field($_POST['rate_action']);
+            check_ajax_referer( $this->core->plugin_short_prefix( 'wp_rate_action_nonce' ), '_nonce' );
+
+            $rate_action = isset( $_POST['rate_action'] ) && is_scalar( $_POST['rate_action'] ) ? sanitize_key( wp_unslash( $_POST['rate_action'] ) ) : '';
+
+            if ( ! in_array( $rate_action, array( 'not-enough', 'done-rating' ), true ) ) {
+                wp_send_json_error( array( 'message' => esc_html__( 'Invalid review action.', 'xt-framework' ) ), 400 );
+            }
 
             $this->rate_plugin($rate_action);
 
@@ -205,13 +210,13 @@ if ( ! class_exists( 'XT_Framework_Review_Notice' ) ) {
                 $time_passed = $this->get_readable_days_passed();
                 $action = $this->core->ajax()->get_ajax_action('plugin_rate_action');
 
-                echo sprintf(esc_html__("Hey %s, I noticed you've been using %s for the past %s – that’s awesome!", "xt-framework"), $first_name, '<strong>' . $this->core->plugin_menu_name() . '</strong>', '<strong>'.$time_passed.'</strong>');
+                echo wp_kses_post( sprintf( __( "Hey %s, I noticed you've been using %s for the past %s – that’s awesome!", 'xt-framework' ), esc_html( $first_name ), '<strong>' . esc_html( $this->core->plugin_menu_name() ) . '</strong>', '<strong>' . esc_html( $time_passed ) . '</strong>' ) );
                 echo '&nbsp;';
-                echo sprintf(esc_html__('Could you please do me a %1$sBIG favor%2$s and give it a %1$s5-star rating%2$s on WordPress? Just to %1$s help us%2$s spread the word and boost our motivation. Many thanks!', "xt-framework"), "<strong>", "</strong>");
+                echo wp_kses_post( sprintf( __( 'Could you please do me a %1$sBIG favor%2$s and give it a %1$s5-star rating%2$s on WordPress? Just to %1$s help us%2$s spread the word and boost our motivation. Many thanks!', 'xt-framework' ), '<strong>', '</strong>' ) );
                 ?>
                 <br><em>~ Georges H</em>
                 <br><br>
-                <span data-action="<?php echo esc_attr($action);?>" data-nonce="<?php echo wp_create_nonce( $this->core->plugin_short_prefix('wp_rate_action_nonce') ) ?>">
+                <span data-action="<?php echo esc_attr($action);?>" data-nonce="<?php echo esc_attr( wp_create_nonce( $this->core->plugin_short_prefix('wp_rate_action_nonce') ) ); ?>">
                     <span><span class="dashicons dashicons-thumbs-up"></span> <a target="_blank" href="<?php echo esc_url($this->review_url);?>"><?php echo esc_html__( 'Ok, you deserve it', 'xt-framework' ) ?></a></span>
                     <span><span class="dashicons dashicons-thumbs-down"></span> <a data-rate-action="not-enough" href="#"><?php echo esc_html__( 'Nope, maybe later', 'xt-framework' ) ?></a></span>
                     <span><span class="dashicons dashicons-yes"></span> <a data-rate-action="done-rating" href="#"><?php echo esc_html__( 'I already did', 'xt-framework' ) ?></a></span>

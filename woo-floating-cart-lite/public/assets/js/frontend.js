@@ -993,6 +993,50 @@
 
 		},
 
+		refreshNonce() {
+
+			return $.ajax({
+				url: cart.get_url('xt_woofc_refresh_nonce'),
+				type: 'post',
+				cache: false,
+				dataType: 'json'
+			}).then((response) => {
+
+				if(!response || !response.nonce) {
+					return $.Deferred().reject().promise();
+				}
+
+				XT_WOOFC.nonce = response.nonce;
+				return response.nonce;
+			});
+		},
+
+		nonceProtectedRequest(request, done, fail) {
+
+			let retried = false;
+
+			const send = () => {
+
+				request().done(done).fail((xhr) => {
+
+					if(!retried && xhr && xhr.status === 403) {
+						retried = true;
+
+						cart.refreshNonce().done(send).fail(() => {
+							cart.setNotice(lang('request_failed'), 'error');
+							fail(xhr);
+						});
+						return;
+					}
+
+					cart.setNotice(lang('request_failed'), 'error');
+					fail(xhr);
+				});
+			};
+
+			send();
+		},
+
 		request(type, args, callback) {
 
 			$(document.body).trigger('xt_woofc_request_start', [args]);
@@ -1011,15 +1055,21 @@
 				return false;
 			}
 
-			args = $.extend(args, {type: type});
+			args = $.extend(args, {
+				type: type
+			});
 
-			$.XT_Ajax_Queue({
+			cart.nonceProtectedRequest(() => {
 
-				url: cart.get_url('xt_woofc_'+type),
-				data: args,
-				type: 'post'
+				return $.XT_Ajax_Queue({
+					url: cart.get_url('xt_woofc_'+type),
+					data: $.extend({}, args, {
+						security: option('nonce')
+					}),
+					type: 'post'
+				});
 
-			}).done((data) => {
+			}, (data) => {
 
 				cart.flushCache();
 
@@ -1030,6 +1080,9 @@
 				}else {
 					cart.onRequestDone(data, type, callback);
 				}
+			}, () => {
+				cart.hideLoading();
+				$(document.body).trigger('xt_woofc_request_failed', [type]);
 			});
 		},
 

@@ -36,7 +36,7 @@ if ( !class_exists( 'XT_Framework_Admin_Messages' ) ) {
             echo esc_attr( $classes );
             ?>">
 			<?php 
-            echo sprintf( wp_kses_post( __( 'You can <a href="%s">Upgrade</a> your license to unlock access to %s.', 'xt-framework' ) ), esc_url( $this->core->access_manager()->get_upgrade_url() ), $scope );
+            echo sprintf( wp_kses_post( __( 'You can <a href="%s">Upgrade</a> your license to unlock access to %s.', 'xt-framework' ) ), esc_url( $this->core->access_manager()->get_upgrade_url() ), esc_html( $scope ) );
             ?>
             </<?php 
             echo esc_attr( $tag );
@@ -55,7 +55,7 @@ if ( !class_exists( 'XT_Framework_Admin_Messages' ) ) {
             echo esc_attr( $colspan );
             ?>">
 					<?php 
-            echo sprintf( wp_kses_post( __( 'You can <a href="%s">Upgrade</a> your license to unlock access to %s.', 'xt-framework' ) ), esc_url( $this->core->access_manager()->get_upgrade_url() ), $scope );
+            echo sprintf( wp_kses_post( __( 'You can <a href="%s">Upgrade</a> your license to unlock access to %s.', 'xt-framework' ) ), esc_url( $this->core->access_manager()->get_upgrade_url() ), esc_html( $scope ) );
             ?>
                 </th>
             </tr>
@@ -73,7 +73,7 @@ if ( !class_exists( 'XT_Framework_Admin_Messages' ) ) {
             ?>">
                 <p>
                     <?php 
-            echo sprintf( esc_html__( 'The %s will unlock access to %s.', 'xt-framework' ), wp_kses_post( '<strong>' . esc_html__( 'Premium Version', 'xt-framework' ) . '</strong>' ), $scope );
+            echo sprintf( esc_html__( 'The %s will unlock access to %s.', 'xt-framework' ), wp_kses_post( '<strong>' . esc_html__( 'Premium Version', 'xt-framework' ) . '</strong>' ), esc_html( $scope ) );
             ?>
                 </p>
                 <p>

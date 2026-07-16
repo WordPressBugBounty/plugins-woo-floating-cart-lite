@@ -192,12 +192,14 @@ class XT_Woo_Floating_Cart_Public
             'home_url' => home_url(),
             'is_customize_preview' => is_customize_preview(),
             'wc_ajax_url' => $this->core->wc_ajax()->get_ajax_url(),
+            'nonce' => wp_create_nonce('woocommerce_xt_woofc_cart_action'),
             'layouts' => $this->core->customizer()->breakpointsJson(),
             'body_lock_scroll' => $this->core->customizer()->get_option_bool('active_cart_body_lock_scroll', false),
             'lang' => array(
                 'loading' => esc_html__('Loading', 'woo-floating-cart'),
                 'min_qty_required' => esc_html__('Min quantity required', 'woo-floating-cart'),
                 'max_stock_reached' => esc_html__('Stock limit reached', 'woo-floating-cart'),
+                'request_failed' => esc_html__('Your cart could not be updated. Please refresh the page and try again.', 'woo-floating-cart'),
                 'title' => esc_html__('Cart', 'woo-floating-cart'),
                 'checkout' => xt_woofc_checkout_label(),
                 'wait' => xt_woofc_checkout_processing_label()

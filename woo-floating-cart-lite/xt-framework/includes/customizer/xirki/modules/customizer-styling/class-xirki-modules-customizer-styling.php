@@ -39,7 +39,7 @@ class Xirki_Modules_Customizer_Styling {
 	 * @access protected
 	 */
 	protected function __construct() {
-		add_action( 'customize_controls_print_styles', array( $this, 'custom_css' ), 99 );
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'custom_css' ), 99 );
 	}
 
 	/**
@@ -100,8 +100,8 @@ class Xirki_Modules_Customizer_Styling {
 			$text_on_accent_disabled   = ( 60 > $accent_disabled_obj->lightness ) ? $accent_disabled_obj->getNew( 'lightness', $accent_disabled_obj->lightness + 60 )->toCSS( $accent_disabled_obj->mode ) : $accent_disabled_obj->getNew( 'lightness', $accent_disabled_obj->lightness - 60 )->toCSS( $accent_disabled_obj->mode );
 			$border_on_accent_disabled = ( 50 < $accent_disabled_obj->lightness ) ? $accent_disabled_obj->getNew( 'lightness', $accent_disabled_obj->lightness - 4 )->toCSS( $accent_disabled_obj->mode ) : $accent_disabled_obj->getNew( 'lightness', $accent_disabled_obj->lightness + 4 )->toCSS( $accent_disabled_obj->mode );
 		}
+		ob_start();
 		?>
-		<style>
 		.wp-full-overlay-sidebar,
 		#customize-controls .customize-info .accordion-section-title,
 		#customize-controls .panel-meta.customize-info .accordion-section-title:hover,
@@ -416,7 +416,13 @@ class Xirki_Modules_Customizer_Styling {
 				margin-left: -<?php echo esc_html( $config['width'] ); ?>;
 			}
 		<?php endif; ?>
-		</style>
 		<?php
+		$css = trim( ob_get_clean() );
+
+		if ( ! empty( $css ) ) {
+			wp_register_style( 'xirki-customizer-styling', false, array(), XIRKI_VERSION );
+			wp_enqueue_style( 'xirki-customizer-styling' );
+			wp_add_inline_style( 'xirki-customizer-styling', $css );
+		}
 	}
 }

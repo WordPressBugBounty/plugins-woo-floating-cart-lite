@@ -12,6 +12,6 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 if(!empty($field['notice'])) {
     $variant = !empty($field['variant']) && in_array($field['variant'], array('info', 'warning', 'error')) ? $field['variant'] : 'info';
 	echo '<div class="xtfw-settings-notice notice-'.esc_attr($variant).'">
-	    <p>'.$field['notice'].'</p>
+	    <p>'.wp_kses_post($field['notice']).'</p>
 	</div>';
 }

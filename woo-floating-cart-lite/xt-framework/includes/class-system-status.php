@@ -103,7 +103,14 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
 
         public function flush_cache($flushSystemInfo = true) {
 
-            if($flushSystemInfo || !empty($_GET['xtfw-refresh-sysinfo'])) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below before mutation.
+            $refresh_requested = isset( $_GET['xtfw-refresh-sysinfo'] ) && is_scalar( $_GET['xtfw-refresh-sysinfo'] ) && 'true' === sanitize_text_field( wp_unslash( $_GET['xtfw-refresh-sysinfo'] ) );
+
+            if ( $refresh_requested ) {
+                $this->verify_system_status_action( 'xtfw_refresh_system_info' );
+            }
+
+            if($flushSystemInfo || $refresh_requested) {
                 delete_option('xt_framework_system_info');
             }
 
@@ -443,6 +450,8 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
          */
         public function show_information_panel() {
 
+            $this->verify_system_status_capability();
+
             $this->check_system_status();
 
             $labels = $this->_requirement_labels;
@@ -455,13 +464,28 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
             if ( apply_filters( 'xt_framework_system_status_check_ip', true ) ) {
 
                 // Using 3rd party api service (https://api.ipify.org) to retrieve client IP to be displayed in system info page
-                $output_ip = wp_remote_retrieve_body(wp_remote_get( 'https://api.ipify.org', array('sslverify' => false)));
+                $ip_response = wp_safe_remote_get( 'https://api.ipify.org', array( 'timeout' => 5 ) );
+
+                if ( ! is_wp_error( $ip_response ) && 200 === wp_remote_retrieve_response_code( $ip_response ) ) {
+                    $candidate_ip = trim( wp_remote_retrieve_body( $ip_response ) );
+
+                    if ( filter_var( $candidate_ip, FILTER_VALIDATE_IP ) ) {
+                        $output_ip = $candidate_ip;
+                    }
+                }
+            }
+
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below before sensitive output.
+            $show_php_info = isset( $_GET['xtfw-phpinfo'] ) && is_scalar( $_GET['xtfw-phpinfo'] ) && 'true' === sanitize_text_field( wp_unslash( $_GET['xtfw-phpinfo'] ) );
+
+            if ( $show_php_info ) {
+                $this->verify_system_status_action( 'xtfw_view_php_info' );
             }
 
             ?>
             <div id="xt-framework-sysinfo" class="wrap xt-framework-system-info">
 
-                <?php if ( ! isset( $_GET['xtfw-phpinfo'] ) || $_GET['xtfw-phpinfo'] !== 'true' ): ?>
+                <?php if ( ! $show_php_info ): ?>
 
                     <h3><?php echo esc_html__( 'General Info', 'xt-framework' ); ?></h3>
                     <table class="widefat striped general-info-table">
@@ -487,7 +511,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                 <?php esc_html_e( 'XT Framework Active PATH', 'xt-framework' ); ?>
                             </th>
                             <td class="requirement-value">
-                                <?php echo '/'.basename(WP_PLUGIN_DIR).str_replace(WP_PLUGIN_DIR, "", $this->core->plugin_framework_path(null, null, true)); ?>
+                                <?php echo esc_html( '/' . basename( WP_PLUGIN_DIR ) . str_replace( WP_PLUGIN_DIR, '', $this->core->plugin_framework_path( null, null, true ) ) ); ?>
 
                             </td>
                         </tr>
@@ -553,7 +577,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                         <strong>v.<?php echo esc_html($instance->plugin_framework_version()); ?></strong>
                                     </td>
                                     <td class="requirement-value">
-                                        <?php echo '/' . basename( WP_PLUGIN_DIR ) . '/' . basename( $instance->plugin_path() ); ?>
+                                        <?php echo esc_html( '/' . basename( WP_PLUGIN_DIR ) . '/' . basename( $instance->plugin_path() ) ); ?>
                                     </td>
                                     <td class="requirement-value">
                                         <img src="<?php echo esc_url( xtfw_dir_url( XTFW_DIR_ADMIN_TABS_ASSETS ) ); ?>/images/markets/<?php echo esc_attr( $instance->market() ); ?>.svg" class="xtfw-market-logo xtfw-market-<?php echo esc_attr( $instance->market() ) ?>"/>
@@ -737,7 +761,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                     <th class="requirement-name" style="width: 25%;font-weight: bold;vertical-align: top;" data-export-label="Overrides">
                                         <?php echo esc_html($plugin_name); ?>
                                         <?php if(!empty($data['outdated'])): ?>
-                                            <mark class="error"><?php echo sprintf( esc_html(_n( '%s outdated template', '%s outdated templates', $data['outdated'], 'xt-framework' )), number_format_i18n( $data['outdated'] ) ); ?> </mark>
+                                            <mark class="error"><?php printf( esc_html( _n( '%s outdated template', '%s outdated templates', $data['outdated'], 'xt-framework' ) ), esc_html( number_format_i18n( $data['outdated'] ) ) ); ?> </mark>
                                         <?php endif; ?>
                                         <span class="arrow-up dashicons dashicons-arrow-up-alt2"></span>
                                         <span class="arrow-down dashicons dashicons-arrow-down-alt2"></span>
@@ -784,7 +808,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                     <h3>
                         <?php echo esc_html__( 'System Info', 'xt-framework' ); ?>
                         <span class="action-link">
-                            <a href="<?php echo esc_url( add_query_arg( array( 'xtfw-refresh-sysinfo' => 'true' ) ) ) ?>" title="<?php esc_attr_e( 'Refresh System Info', 'xt-framework'); ?>">
+                            <a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'xtfw-refresh-sysinfo' => 'true' ) ), 'xtfw_refresh_system_info', '_xtfw_nonce' ) ) ?>" title="<?php esc_attr_e( 'Refresh System Info', 'xt-framework'); ?>">
                                 <span class="dashicons dashicons-image-rotate"></span>
                             </a>
                         </span>
@@ -873,10 +897,10 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                                 echo esc_html__( 'Contact your hosting company in order to enable it.', 'xt-framework' );
                                                 break;
                                             case 'wp_memory_limit':
-                                                echo sprintf( esc_html__( 'Read more %s here%s or contact your hosting company in order to increase it.', 'xt-framework' ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">', '</a>' );
+                                                echo wp_kses_post( sprintf( __( 'Read more %s here%s or contact your hosting company in order to increase it.', 'xt-framework' ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">', '</a>' ) );
                                                 break;
                                             default:
-                                                echo apply_filters( 'xt_framework_system_generic_message', '', $item );
+                                                echo wp_kses_post( apply_filters( 'xt_framework_system_generic_message', '', $item ) );
 
                                         } ?>
                                     <?php endif; ?>
@@ -906,11 +930,11 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                     </table>
                     <br>
                     <p>
-                        <a href="<?php echo esc_url( add_query_arg( array( 'xtfw-phpinfo' => 'true' ) ) ) ?>"><?php esc_html_e( 'Show Full PHP Info', 'xt-framework' ) ?></a>
+                        <a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'xtfw-phpinfo' => 'true' ) ), 'xtfw_view_php_info', '_xtfw_nonce' ) ) ?>"><?php esc_html_e( 'Show Full PHP Info', 'xt-framework' ) ?></a>
                     </p>
                 <?php else : ?>
                     <p>
-                        <a href="<?php echo esc_url( add_query_arg( array( 'xtfw-phpinfo' => 'false' ) ) ) ?>"><?php esc_html_e( 'Back to System Status', 'xt-framework' ) ?></a>
+                        <a href="<?php echo esc_url( remove_query_arg( array( 'xtfw-phpinfo', '_xtfw_nonce' ) ) ) ?>"><?php esc_html_e( 'Back to System Status', 'xt-framework' ) ?></a>
                     </p>
                     <?php
 
@@ -1079,9 +1103,15 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
             if ( apply_filters( 'xt_framework_system_status_check_ssl', true ) ) {
 
                 // Using 3rd party api service (https://www.howsmyssl.com/a/check) to retrieve client TLS version to be displayed in system info page
-                $data = wp_remote_retrieve_body(wp_remote_get( 'https://www.howsmyssl.com/a/check', array('sslverify' => false)));
-                $json = json_decode( $data );
-                $tls  = $json != null ? str_replace( 'TLS ', '', $json->tls_version ) : '';
+                $tls_response = wp_safe_remote_get( 'https://www.howsmyssl.com/a/check', array( 'timeout' => 5 ) );
+
+                if ( ! is_wp_error( $tls_response ) && 200 === wp_remote_retrieve_response_code( $tls_response ) ) {
+                    $json = json_decode( wp_remote_retrieve_body( $tls_response ) );
+
+                    if ( is_object( $json ) && isset( $json->tls_version ) && is_string( $json->tls_version ) ) {
+                        $tls = sanitize_text_field( str_replace( 'TLS ', '', $json->tls_version ) );
+                    }
+                }
             }
 
             //Get PHP version
@@ -1108,6 +1138,36 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                 'url_fopen_enabled' => ini_get( 'allow_url_fopen' ),
             ) );
 
+        }
+
+        /**
+         * Ensure the current user can access sensitive system information.
+         *
+         * @return void
+         */
+        private function verify_system_status_capability() {
+
+            $capability = $this->core->plugin_dependencies()->depends_on( 'WooCommerce' ) ? 'manage_woocommerce' : 'manage_options';
+
+            if ( ! current_user_can( $capability ) ) {
+                wp_die(
+                    esc_html__( 'You are not allowed to view system information.', 'xt-framework' ),
+                    esc_html__( 'Forbidden', 'xt-framework' ),
+                    array( 'response' => 403 )
+                );
+            }
+        }
+
+        /**
+         * Verify a nonce-protected system-status action.
+         *
+         * @param string $action Nonce action.
+         * @return void
+         */
+        private function verify_system_status_action( $action ) {
+
+            $this->verify_system_status_capability();
+            check_admin_referer( $action, '_xtfw_nonce' );
         }
 
         /**

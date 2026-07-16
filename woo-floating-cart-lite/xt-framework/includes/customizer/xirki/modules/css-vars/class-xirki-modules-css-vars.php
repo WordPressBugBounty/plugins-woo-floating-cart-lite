@@ -10,6 +10,8 @@
  * @since       3.0.28
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * The Xirki_Modules_CSS_Vars object.
  *
@@ -53,8 +55,8 @@ class Xirki_Modules_CSS_Vars {
 	 */
 	protected function __construct() {
 		add_action( 'init', array( $this, 'populate_vars' ) );
-		add_action( 'wp_head', array( $this, 'the_style' ), 999 );
-		add_action( 'admin_head', array( $this, 'the_style' ), 999 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'the_style' ), 999 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'the_style' ), 999 );
 		add_action( 'customize_preview_init', array( $this, 'postmessage' ) );
 	}
 
@@ -117,13 +119,21 @@ class Xirki_Modules_CSS_Vars {
 			return;
 		}
 
-		echo '<style id="xirki-css-vars">';
-		echo ':root{';
+		$css = ':root{';
 		foreach ( $this->vars as $var => $val ) {
-			echo esc_html( $var ) . ':' . esc_html( $val ) . ';';
+			$var = preg_replace( '/[^a-zA-Z0-9_-]/', '', (string) $var );
+
+			if ( empty( $var ) ) {
+				continue;
+			}
+
+			$css .= $var . ':' . wp_strip_all_tags( (string) $val ) . ';';
 		}
-		echo '}';
-		echo '</style>';
+		$css .= '}';
+
+		wp_register_style( 'xirki-css-vars', false, array(), XIRKI_VERSION );
+		wp_enqueue_style( 'xirki-css-vars' );
+		wp_add_inline_style( 'xirki-css-vars', $css );
 	}
 
 	/**

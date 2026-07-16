@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 if ( ! function_exists( 'xtfw_parse_relative_date_option' ) ) {
 
     /**

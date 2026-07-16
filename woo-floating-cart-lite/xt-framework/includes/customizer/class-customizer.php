@@ -541,7 +541,7 @@ if(!class_exists('XT_Framework_Customizer')) {
 
 			        if ( ! $has_one_panel ) {
 				        echo '<li>';
-				        echo '    <a title="' . esc_html__( 'Open in Customizer', 'xt-framework' ) . '" href="' . esc_url($customizer->customizer_link( $panel['id'] )) . '"><span class="dashicons ' . $panel['icon'] . '"></span> ' . $panel['title'] . '</a>';
+				        echo '    <a title="' . esc_attr__( 'Open in Customizer', 'xt-framework' ) . '" href="' . esc_url($customizer->customizer_link( $panel['id'] )) . '"><span class="dashicons ' . esc_attr( $panel['icon'] ) . '"></span> ' . esc_html( $panel['title'] ) . '</a>';
 			        }
 
 			        $this->render_customizer_tab_sections( $customizer, $panel );

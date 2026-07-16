@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 $fields[] = array(
     'id'       => 'show_archive_add_to_cart_button',
     'section'  => 'shop',

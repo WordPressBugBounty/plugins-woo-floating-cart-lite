@@ -87,7 +87,24 @@ class XT_Woo_Floating_Cart_Ajax {
             'callback' => array($this, 'restore_item'),
             'nopriv'   => true,
         );
+        $ajax_events[] = array(
+            'function' => 'xt_woofc_refresh_nonce',
+            'callback' => array($this, 'refresh_nonce'),
+            'nopriv'   => true,
+        );
         return $ajax_events;
+    }
+
+    /**
+     * Return a fresh cart-action nonce for cached pages and renewed sessions.
+     */
+    public function refresh_nonce() {
+        if ( WC()->session && method_exists( WC()->session, 'set_customer_session_cookie' ) ) {
+            WC()->session->set_customer_session_cookie( true );
+        }
+        wp_send_json( array(
+            'nonce' => wp_create_nonce( 'woocommerce_xt_woofc_cart_action' ),
+        ) );
     }
 
     public function set_notice( $notice, $type = 'success' ) {
@@ -170,6 +187,7 @@ class XT_Woo_Floating_Cart_Ajax {
      * Update item qty
      */
     public function update_qty() {
+        check_ajax_referer( 'woocommerce_xt_woofc_cart_action', 'security' );
         $this->core->frontend()->define_cart_constant();
         $cart_item_key = ( !empty( $_POST['cart_item_key'] ) ? sanitize_text_field( $_POST['cart_item_key'] ) : null );
         if ( !empty( $cart_item_key ) ) {
@@ -199,6 +217,7 @@ class XT_Woo_Floating_Cart_Ajax {
      * Remove item
      */
     public function remove_item() {
+        check_ajax_referer( 'woocommerce_xt_woofc_cart_action', 'security' );
         $this->core->frontend()->define_cart_constant();
         $cart_item_key = ( !empty( $_POST['cart_item_key'] ) ? sanitize_text_field( $_POST['cart_item_key'] ) : null );
         if ( !empty( $cart_item_key ) ) {
@@ -212,6 +231,7 @@ class XT_Woo_Floating_Cart_Ajax {
      * Restore last removed item
      */
     public function restore_item() {
+        check_ajax_referer( 'woocommerce_xt_woofc_cart_action', 'security' );
         $this->core->frontend()->define_cart_constant();
         $cart_item_key = ( !empty( $_POST['cart_item_key'] ) ? sanitize_text_field( $_POST['cart_item_key'] ) : null );
         if ( !empty( $cart_item_key ) ) {
@@ -225,6 +245,7 @@ class XT_Woo_Floating_Cart_Ajax {
      * AJAX clear cart
      */
     public function clear() {
+        check_ajax_referer( 'woocommerce_xt_woofc_cart_action', 'security' );
         $this->core->frontend()->define_cart_constant();
         WC()->session->set( 'xt_woofc_removed_cart_contents', WC()->cart->get_cart_contents() );
         WC()->cart->empty_cart();
@@ -236,6 +257,7 @@ class XT_Woo_Floating_Cart_Ajax {
      * Restore last cleared items
      */
     public function clear_restore() {
+        check_ajax_referer( 'woocommerce_xt_woofc_cart_action', 'security' );
         $this->core->frontend()->define_cart_constant();
         $removed_cart_contents = WC()->session->get( 'xt_woofc_removed_cart_contents' );
         $removed_cart_contents = array_reverse( $removed_cart_contents );
@@ -251,6 +273,7 @@ class XT_Woo_Floating_Cart_Ajax {
      * AJAX apply coupon on checkout page.
      */
     public function apply_coupon() {
+        check_ajax_referer( 'woocommerce_xt_woofc_cart_action', 'security' );
         $this->core->frontend()->define_cart_constant();
         if ( !empty( $_POST['coupon_code'] ) ) {
             $coupon_code = wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) );
@@ -280,6 +303,7 @@ class XT_Woo_Floating_Cart_Ajax {
      * AJAX remove coupon on cart and checkout page.
      */
     public function remove_coupon() {
+        check_ajax_referer( 'woocommerce_xt_woofc_cart_action', 'security' );
         $this->core->frontend()->define_cart_constant();
         $coupon = ( isset( $_POST['coupon'] ) ? wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) : false );
         if ( empty( $coupon ) ) {
@@ -296,6 +320,7 @@ class XT_Woo_Floating_Cart_Ajax {
      * Override native function because the nonce check is failing if caching plugin enabled
      */
     public function update_shipping_method() {
+        check_ajax_referer( 'woocommerce_xt_woofc_cart_action', 'security' );
         $this->core->frontend()->define_cart_constant();
         $chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
         $posted_shipping_methods = ( isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array() );

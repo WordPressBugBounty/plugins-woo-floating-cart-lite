@@ -10,6 +10,8 @@
  * @since       3.0.0
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * The Xirki_Modules_CSS object.
  */
@@ -85,6 +87,7 @@ class Xirki_Modules_CSS {
 	public function init() {
 
 		Xirki_Modules_Webfonts::get_instance();
+		$config = apply_filters( 'xirki_config', array() );
 
 		// Allow completely disabling Xirki CSS output.
 		if ( ( defined( 'XIRKI_NO_OUTPUT' ) && true === XIRKI_NO_OUTPUT ) || ( isset( $config['disable_output'] ) && true === $config['disable_output'] ) ) {
@@ -97,14 +100,13 @@ class Xirki_Modules_CSS {
 		add_action( 'wp', array( $this, 'print_styles_action' ) );
 
 		if ( ! apply_filters( 'xirki_output_inline_styles', true ) ) {
-			$config   = apply_filters( 'xirki_config', array() );
 			$priority = 999;
 			if ( isset( $config['styles_priority'] ) ) {
 				$priority = absint( $config['styles_priority'] );
 			}
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), $priority );
 		} else {
-			add_action( 'wp_head', array( $this, 'print_styles_inline' ), 999 );
+			add_action( 'wp_enqueue_scripts', array( $this, 'print_styles_inline' ), 999 );
 		}
 	}
 
@@ -116,9 +118,15 @@ class Xirki_Modules_CSS {
 	 * @return void
 	 */
 	public function print_styles_inline() {
-		echo '<style id="xirki-inline-styles">';
+		ob_start();
 		$this->print_styles();
-		echo '</style>';
+		$css = trim( ob_get_clean() );
+
+		if ( ! empty( $css ) ) {
+			wp_register_style( 'xirki-inline-styles', false, array(), XIRKI_VERSION );
+			wp_enqueue_style( 'xirki-inline-styles' );
+			wp_add_inline_style( 'xirki-inline-styles', $css );
+		}
 	}
 
 	/**
@@ -158,7 +166,10 @@ class Xirki_Modules_CSS {
 		 * Note to code reviewers:
 		 * There is no need for a nonce check here, we're only checking if this is a valid request or not.
 		 */
-		if ( empty( $_GET['action'] ) || apply_filters( 'xirki_styles_action_handle', 'xirki-styles' ) !== $_GET['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only stylesheet endpoint.
+		$requested_action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+
+		if ( empty( $requested_action ) || apply_filters( 'xirki_styles_action_handle', 'xirki-styles' ) !== $requested_action ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
 		}
 

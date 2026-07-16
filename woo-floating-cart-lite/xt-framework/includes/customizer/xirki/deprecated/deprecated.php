@@ -14,6 +14,8 @@
 
 // phpcs:ignoreFile
 
+defined( 'ABSPATH' ) || exit;
+
 require_once wp_normalize_path( dirname( __FILE__ ) . '/functions.php' );
 require_once wp_normalize_path( dirname( __FILE__ ) . '/classes.php' );
 

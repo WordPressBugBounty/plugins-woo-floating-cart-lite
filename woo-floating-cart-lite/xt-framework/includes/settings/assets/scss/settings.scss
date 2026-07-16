@@ -1,6 +1,7 @@
 .xtfw-admin-tabs-page .xtfw-admin-tabs-panel.xtfw-panel-settings-type {
     padding: 0;
     box-shadow: none;
+	border-radius: 10px;
 
     @media screen and (max-width: 782px) {
         box-shadow: 0 0 10px rgba(24, 24, 24, 0.15) !important;

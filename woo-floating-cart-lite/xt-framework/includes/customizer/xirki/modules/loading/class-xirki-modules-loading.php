@@ -9,6 +9,8 @@
  * @since       3.0.0
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Modifies the loading overlay.
  */
@@ -67,7 +69,7 @@ class Xirki_Modules_Loading {
 		}
 		// Add the "loading" icon.
 		add_action( 'wp_footer', array( $this, 'add_loader_to_footer' ) );
-		add_action( 'wp_head', array( $this, 'add_loader_styles_to_header' ), 99 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'add_loader_styles_to_header' ), 99 );
 		$this->remove_default_loading_styles();
 	}
 
@@ -90,8 +92,8 @@ class Xirki_Modules_Loading {
 	 * @access public
 	 */
 	public function add_loader_styles_to_header() {
+		ob_start();
 		?>
-		<style>
 			body.wp-customizer-unloading {
 				opacity: 1;
 				cursor: progress !important;
@@ -113,7 +115,7 @@ class Xirki_Modules_Loading {
 				opacity: 0;
 				-webkit-transition: opacity 0.5s;
 				transition: opacity 0.5s;
-				background-image: url("<?php echo esc_url_raw( Xirki::$url ); ?>/assets/images/xirki-logo.svg");
+				background-image: url("<?php echo esc_url( Xirki::$url ); ?>/assets/images/xirki-logo.svg");
 				background-repeat: no-repeat;
 				background-position: center center;
 			}
@@ -151,8 +153,12 @@ class Xirki_Modules_Loading {
 					opacity: 0;
 				}
 			}
-		</style>
 		<?php
+		$css = trim( ob_get_clean() );
+
+		wp_register_style( 'xirki-customizer-loading', false, array(), XIRKI_VERSION );
+		wp_enqueue_style( 'xirki-customizer-loading' );
+		wp_add_inline_style( 'xirki-customizer-loading', $css );
 	}
 
 	/**

@@ -254,6 +254,8 @@
     padding: 5px 13px;
     border: 0;
     box-shadow: none !important;
+	border-top-right-radius: 8px;
+	border-top-left-radius: 8px;
 
     &.fs-tab.pricing:not(.nav-tab-active){
       @extend .nav-tab-featured;
@@ -392,6 +394,7 @@
     background: #fdfdfd;
     padding: 25px;
     overflow: hidden;
+	border-radius: 10px;
 
     .wrap{
       margin:0;

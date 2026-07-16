@@ -251,12 +251,20 @@ if(!class_exists('XT_Framework_Settings')) {
 
         public function get_current_setting_tab_id() {
 
-            return !empty(filter_input(INPUT_POST, 'tab')) ? filter_input(INPUT_POST, 'tab') : filter_input(INPUT_GET, 'tab');
+            // Navigation state is read-only here; save and AJAX callers verify their nonce before using it.
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            if ( ! empty( $_POST['tab'] ) && is_scalar( $_POST['tab'] ) ) {
+                return sanitize_key( wp_unslash( $_POST['tab'] ) );
+            }
+
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            return ! empty( $_GET['tab'] ) && is_scalar( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
         }
 
         public function get_current_setting_tab_subid() {
 
-            return filter_input(INPUT_GET, 'sub_id');
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation state.
+            return isset( $_GET['sub_id'] ) && is_scalar( $_GET['sub_id'] ) ? absint( wp_unslash( $_GET['sub_id'] ) ) : 0;
         }
 
         public function field_prefixed_id($id) {
@@ -623,7 +631,14 @@ if(!class_exists('XT_Framework_Settings')) {
 
         public function ajax_refresh_preview() {
 
-            $preview_id = filter_input(INPUT_POST, 'preview');
+            $this->verify_settings_request( true );
+
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified immediately above.
+            $preview_id = isset( $_POST['preview'] ) && is_scalar( $_POST['preview'] ) ? sanitize_key( wp_unslash( $_POST['preview'] ) ) : '';
+
+            if ( empty( $preview_id ) ) {
+                wp_send_json_error( array( 'message' => esc_html__( 'Invalid preview request.', 'xt-framework' ) ), 400 );
+            }
 
             $preview_fields = $this->get_preview_fields($preview_id);
 
@@ -676,8 +691,11 @@ if(!class_exists('XT_Framework_Settings')) {
         public function ajax_process_action() {
 
             // Handle admin actions
-            
-            $current_action = !empty(filter_input(INPUT_POST, 'action_id')) ? filter_input(INPUT_POST, 'action_id') : filter_input(INPUT_GET, 'action_id');
+
+            $this->verify_settings_request( true );
+
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified immediately above.
+            $current_action = isset( $_POST['action_id'] ) && is_scalar( $_POST['action_id'] ) ? sanitize_key( wp_unslash( $_POST['action_id'] ) ) : '';
 
             $success = false;
 
@@ -953,7 +971,7 @@ if(!class_exists('XT_Framework_Settings')) {
                 $description = $field['desc'];
             }
 
-            if ( $description && in_array( $field['type'], array( 'textarea', 'radio', 'checkbox', 'admin_action' ), true ) ) {
+            if ( $description && in_array( $field['type'], array( 'textarea', 'editor', 'radio', 'checkbox', 'admin_action' ), true ) ) {
                 if(!empty($field['desc_inline'])) {
                     ?>
 	                <span class="description inline"><?php echo wp_kses_post( $description ); ?></span>
@@ -1044,8 +1062,7 @@ if(!class_exists('XT_Framework_Settings')) {
          */
         public function save_settings($ajax = false) {
 
-            // Check the nonce.
-            check_admin_referer( $this->core->plugin_prefix('settings_save_verify') );
+            $this->verify_settings_request( $ajax );
 
             // Get the setting fields
             $tab_id = $this->get_current_setting_tab_id();
@@ -1081,12 +1098,13 @@ if(!class_exists('XT_Framework_Settings')) {
 
             // Set redirect args
             $redirect_args = array();
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The save nonce was verified above.
             if(!empty($_GET['sub_id'])) {
                 $redirect_args['sub_id'] = $this->get_current_setting_tab_subid();
             }
 
             // Go back to the settings page.
-            wp_redirect( $this->core->plugin_admin_url( $tab_id, $redirect_args) );
+            wp_safe_redirect( $this->core->plugin_admin_url( $tab_id, $redirect_args) );
             exit;
 
         }
@@ -1104,6 +1122,10 @@ if(!class_exists('XT_Framework_Settings')) {
 
             $data = $this->prepare_before_save_fields($fields);
 
+            if ( empty( $data ) || ! is_array( $data ) ) {
+                return false;
+            }
+
             return $this->save_fields_options($data['update_options'], $data['autoload_options']);
         }
 
@@ -1118,7 +1140,9 @@ if(!class_exists('XT_Framework_Settings')) {
          */
         public function prepare_before_save_fields( $fields) {
 
-            $data = filter_input_array(INPUT_POST);
+            // Every caller verifies the settings nonce; each value is sanitized by its declared field schema below.
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+            $data = ! empty( $_POST ) && is_array( $_POST ) ? wp_unslash( $_POST ) : array();
 
             if ( empty( $data ) ) {
                 return false;
@@ -1145,11 +1169,11 @@ if(!class_exists('XT_Framework_Settings')) {
                     parse_str( $field['name'], $option_name_array );
                     $option_name  = current( array_keys( $option_name_array ) );
                     $setting_name = key( $option_name_array[ $option_name ] );
-                    $raw_value    = isset( $data[ $option_name ][ $setting_name ] ) ? wp_unslash( $data[ $option_name ][ $setting_name ] ) : null;
+                    $raw_value    = isset( $data[ $option_name ][ $setting_name ] ) ? $data[ $option_name ][ $setting_name ] : null;
                 } else {
                     $option_name  = $field['name'];
                     $setting_name = '';
-                    $raw_value    = isset( $data[ $field['name'] ] ) ? wp_unslash( $data[ $field['name'] ] ) : null;
+                    $raw_value    = isset( $data[ $field['name'] ] ) ? $data[ $field['name'] ] : null;
                 }
 
                 $option_type = $field['type'];
@@ -1160,17 +1184,23 @@ if(!class_exists('XT_Framework_Settings')) {
                         $value = '1' === $raw_value || 'yes' === $raw_value ? 'yes' : 'no';
                         break;
                     case 'textarea':
-                        $value = wp_kses_post( trim( $raw_value ) );
+                    case 'editor':
+						$value = is_scalar( $raw_value ) ? wp_kses_post( trim( (string) $raw_value ) ) : '';
                         break;
                     case 'multiselect':
                     case 'multi_select_countries':
-                        $value = array_filter( array_map( 'xtfw_clean', (array) $raw_value ) );
+                        $value = array_filter( array_map( 'sanitize_text_field', (array) $raw_value ) );
+
+                        if ( ! empty( $field['options'] ) ) {
+                            $allowed_values = array_map( 'strval', array_keys( $field['options'] ) );
+                            $value          = array_values( array_intersect( $value, $allowed_values ) );
+                        }
                         break;
                     case 'image_width':
                         $value = array();
                         if ( isset( $raw_value['width'] ) ) {
-                            $value['width']  = xtfw_clean( $raw_value['width'] );
-                            $value['height'] = xtfw_clean( $raw_value['height'] );
+                            $value['width']  = absint( $raw_value['width'] );
+                            $value['height'] = isset( $raw_value['height'] ) ? absint( $raw_value['height'] ) : 0;
                             $value['crop']   = isset( $raw_value['crop'] ) ? 1 : 0;
                         } else {
                             $value['width']  = $field['default']['width'];
@@ -1179,6 +1209,8 @@ if(!class_exists('XT_Framework_Settings')) {
                         }
                         break;
                     case 'select':
+                    case 'radio':
+                    case 'radio-buttons':
                         $allowed_values = empty( $field['options'] ) ? array() : array_map( 'strval', array_keys( $field['options'] ) );
                         if ( empty( $field['default'] ) && empty( $allowed_values ) ) {
                             $value = null;
@@ -1186,6 +1218,28 @@ if(!class_exists('XT_Framework_Settings')) {
                         }
                         $default = ( empty( $field['default'] ) ? $allowed_values[0] : $field['default'] );
                         $value   = in_array( $raw_value, $allowed_values, true ) ? $raw_value : $default;
+                        break;
+                    case 'email':
+						$value = is_scalar( $raw_value ) ? sanitize_email( (string) $raw_value ) : '';
+                        break;
+                    case 'url':
+						$value = is_scalar( $raw_value ) ? esc_url_raw( (string) $raw_value ) : '';
+                        break;
+                    case 'number':
+                    case 'range':
+                        $default_number = isset( $field['default'] ) && is_numeric( $field['default'] ) ? (string) $field['default'] : '';
+                        $value          = is_numeric( $raw_value ) ? (string) $raw_value : $default_number;
+
+                        if ( isset( $field['custom_attributes']['min'] ) && is_numeric( $field['custom_attributes']['min'] ) ) {
+                            $value = (string) max( (float) $field['custom_attributes']['min'], (float) $value );
+                        }
+
+                        if ( isset( $field['custom_attributes']['max'] ) && is_numeric( $field['custom_attributes']['max'] ) ) {
+                            $value = (string) min( (float) $field['custom_attributes']['max'], (float) $value );
+                        }
+                        break;
+                    case 'color':
+                        $value = $this->sanitize_color( $raw_value, isset( $field['default'] ) ? $field['default'] : '' );
                         break;
                     case 'relative_date_selector':
                         $value = xtfw_parse_relative_date_option( $raw_value );
@@ -1289,6 +1343,78 @@ if(!class_exists('XT_Framework_Settings')) {
             }
 
             return true;
+        }
+
+        /**
+         * Verify a privileged settings request.
+         *
+         * @param bool $ajax Whether the request is an AJAX request.
+         * @return void
+         */
+        private function verify_settings_request( $ajax = false ) {
+
+            $capability = $this->core->plugin_dependencies()->depends_on( 'WooCommerce' ) ? 'manage_woocommerce' : 'manage_options';
+
+            if ( ! current_user_can( $capability ) ) {
+                if ( $ajax ) {
+                    wp_send_json_error( array( 'message' => esc_html__( 'You are not allowed to manage these settings.', 'xt-framework' ) ), 403 );
+                }
+
+                wp_die(
+                    esc_html__( 'You are not allowed to manage these settings.', 'xt-framework' ),
+                    esc_html__( 'Forbidden', 'xt-framework' ),
+                    array( 'response' => 403 )
+                );
+            }
+
+            $request_method = isset( $_SERVER['REQUEST_METHOD'] ) && is_scalar( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+
+            if ( 'POST' !== strtoupper( $request_method ) ) {
+                if ( $ajax ) {
+                    wp_send_json_error( array( 'message' => esc_html__( 'Invalid request method.', 'xt-framework' ) ), 405 );
+                }
+
+                wp_die(
+                    esc_html__( 'Invalid request method.', 'xt-framework' ),
+                    esc_html__( 'Method Not Allowed', 'xt-framework' ),
+                    array( 'response' => 405 )
+                );
+            }
+
+            if ( $ajax ) {
+                check_ajax_referer( $this->core->plugin_prefix( 'settings_save_verify' ) );
+            } else {
+                check_admin_referer( $this->core->plugin_prefix( 'settings_save_verify' ) );
+            }
+        }
+
+        /**
+         * Sanitize a color value produced by the alpha color picker.
+         *
+         * @param mixed  $raw_value Raw submitted value.
+         * @param string $default Default value.
+         * @return string
+         */
+        private function sanitize_color( $raw_value, $default = '' ) {
+
+            $raw_value = is_scalar( $raw_value ) ? trim( (string) $raw_value ) : '';
+            $hex       = sanitize_hex_color( $raw_value );
+
+            if ( ! empty( $hex ) ) {
+                return $hex;
+            }
+
+            if ( 'transparent' === strtolower( $raw_value ) ) {
+                return 'transparent';
+            }
+
+            if ( preg_match( '/^rgba?\(\s*(?:\d{1,3}\s*,\s*){2}\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/', $raw_value ) ) {
+                return $raw_value;
+            }
+
+            $default_hex = is_scalar( $default ) ? sanitize_hex_color( $default ) : '';
+
+            return ! empty( $default_hex ) ? $default_hex : '';
         }
 
 
@@ -1401,6 +1527,7 @@ if(!class_exists('XT_Framework_Settings')) {
          */
         public function get_settings_section_id() {
 
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation state.
             return $this->core->plugin_tabs()->get_tab_id() !== '' && isset($_GET['sub_id']) ? $this->get_current_setting_tab_subid() : null;
         }
 
@@ -1441,6 +1568,7 @@ if(!class_exists('XT_Framework_Settings')) {
                 XTFW_VERSION
            );
 
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Selects a read-only admin stylesheet.
             if(!empty($_GET['premium_css'])) {
                 wp_enqueue_style( $handle.'-premium', xtfw_dir_url( XTFW_DIR_SETTINGS_ASSETS ) . '/css/settings-premium.css', array(), XTFW_VERSION );
             }
@@ -1472,6 +1600,7 @@ if(!class_exists('XT_Framework_Settings')) {
                 array(
                     'prefix' => $this->core->plugin_short_prefix(),
                     'ajax_action' => $this->core->ajax()->get_ajax_action('%%action%%'),
+                    'nonce' => wp_create_nonce( $this->core->plugin_prefix( 'settings_save_verify' ) ),
                     'assets_url' => xtfw_dir_url(XTFW_DIR_SETTINGS_ASSETS),
                     'sub_id' => $this->get_settings_section_id(),
                     'fields' => $this->get_setting_tab_fields()
