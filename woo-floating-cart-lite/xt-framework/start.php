@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-$this_fw_version = '2.5.13';
+$this_fw_version = '2.5.14';
 
 /**
  * Special logic to make sure that every XT plugin framework
@@ -31,6 +31,8 @@ $this_fw_version = '2.5.13';
  */
 
 global $xtfw_active_plugins;
+
+require_once dirname( __FILE__ ) . '/includes/functions-bootstrap.php';
 
 if ( ! function_exists( 'xtfw_find_caller_plugin_file' ) ) {
     // Require FW essentials.
@@ -162,9 +164,7 @@ if ( ! isset( $xtfw_active_plugins->newest ) ) {
         }
 
         if(empty($network_activated_plugins)) {
-
-            $request_uri = isset( $_SERVER['REQUEST_URI'] ) && is_scalar( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : admin_url();
-            xtfw_redirect( wp_validate_redirect( $request_uri, admin_url() ) );
+            xtfw_redirect( xtfw_get_refresh_url() );
         }
     }
 
@@ -174,9 +174,11 @@ if ( ! isset( $xtfw_active_plugins->newest ) ) {
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
 
-    $fw_starter_path = xtfw_normalize_path( WP_PLUGIN_DIR . '/' . $this_fw_relative_path . '/start.php' );
+    $newest_fw_starter_path = ! empty( $xtfw_active_plugins->newest->fw_path )
+        ? xtfw_normalize_path( WP_PLUGIN_DIR . '/' . $xtfw_active_plugins->newest->fw_path . '/start.php' )
+        : '';
 
-    $is_newest_fw_path_valid = ( $xtfw_active_plugins->newest->in_activation ) && file_exists( $fw_starter_path );
+    $is_newest_fw_path_valid = ! empty( $newest_fw_starter_path ) && file_exists( $newest_fw_starter_path );
 
     if ( ! $is_newest_fw_path_valid && ! $is_current_fw_newest ) {
         // Plugin with newest FW is no longer active, or FW was moved to a different location.
@@ -214,8 +216,7 @@ if ( ! isset( $xtfw_active_plugins->newest ) ) {
             if ( xtfw_newest_fw_plugin_first() ) {
                 // Refresh page after re-order to make sure activated plugin loads newest FW.
                 if ( class_exists( 'XT_Framework' ) ) {
-                    $request_uri = isset( $_SERVER['REQUEST_URI'] ) && is_scalar( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : admin_url();
-                    xtfw_redirect( wp_validate_redirect( $request_uri, admin_url() ) );
+                    xtfw_redirect( xtfw_get_refresh_url() );
                 }
             }
         }

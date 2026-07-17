@@ -7,7 +7,7 @@ Author URI: https://www.xplodedthemes.com
 Tags: floating cart, woocommerce side cart, ajax add to cart, mini cart, upsell
 Requires at least: 4.6
 Tested up to: 7.0.1
-Stable tag: 2.8.10
+Stable tag: 2.8.11
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -105,6 +105,9 @@ Installing "Floating Cart for WooCommerce" can be done by following these steps:
 3. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+#### V.2.8.11 - 2026-07-16
+- **update**: XT Framework 2.5.14, preventing first-request fatal errors and repeated upgrade redirects while switching to a newer embedded framework
 
 #### V.2.8.10 - 2026-07-16
 - **security**: Added nonce validation and one-time nonce refresh to Floating Cart cart, coupon, and shipping AJAX actions

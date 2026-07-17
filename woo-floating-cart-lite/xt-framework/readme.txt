@@ -16,6 +16,9 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.5.14 - 16.07.2026
+- **fix**: Prevented first-request fatal errors and repeated upgrade redirects while switching to a newer embedded framework.
+
 #### V.2.5.13 - 16.07.2026
 - **build**: Preserved generated Freemius pricing and Xirki vendor assets during framework synchronization.
 
