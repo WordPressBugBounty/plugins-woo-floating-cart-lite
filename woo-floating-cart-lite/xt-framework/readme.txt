@@ -16,6 +16,12 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.5.15 - 16.09.2026
+- **fix**: Prevented the "Follow Us" widget from being injected twice inside XT plugin admin pages.
+- **fix**: Restored the Browse Plugins grid layout on modern WordPress by applying the core plugin-install body class.
+- **fix**: Kept the Browse Plugins grid at three columns on very large screens.
+- **update**: Updated the bundled Freemius SDK to v2.13.4.
+
 #### V.2.5.14 - 16.07.2026
 - **fix**: Prevented first-request fatal errors and repeated upgrade redirects while switching to a newer embedded framework.
 

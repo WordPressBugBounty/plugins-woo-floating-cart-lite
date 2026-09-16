@@ -57,6 +57,7 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
             $this->core = $core;
 
             add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'), 99);
+            add_filter('admin_body_class', array($this, 'admin_body_class'), 10, 1);
             add_filter('xtfw_admin_tabs', array( $this, 'add_plugins_tab'), 10, 1 );
             add_filter('install_plugins_tabs', array( $this, 'add_native_plugins_tab'), 10, 1);
             add_filter('install_plugins_table_api_args_'.$this->tab, array( $this, 'native_plugins_args'), 10, 1);
@@ -96,10 +97,32 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
             return $this->core->framework_tabs()->is_tab($this->slug);
         }
 
+        /**
+         * Required so the plugin grid on the framework Browse Plugins page gets
+         * WordPress core's flexbox layout, which is scoped to the
+         * .plugin-install-php body class since the list-tables.css refactor.
+         *
+         * @param string $classes
+         * @return string
+         */
+        public function admin_body_class($classes) {
+
+            if ($this->is_framework_plugins_page()) {
+                $classes .= ' plugin-install-php';
+            }
+
+            return $classes;
+        }
+
         public function enqueue_assets() {
 
             if(!$this->is_framework_plugins_page() && !$this->is_plugin_install_page_xt_tabs()) {
                 return;
+            }
+
+            if($this->is_framework_plugins_page()) {
+
+                wp_add_inline_style('common', '@media screen and (min-width: 1600px) { .plugin-install-php.xt-plugins_page_xt-plugins-plugins .xtfw-plugins-tab .plugin-card { width: calc((100% - 32px) / 3); } }');
             }
 
             wp_add_inline_script('xtfw-inline', '
