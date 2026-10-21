@@ -16,6 +16,13 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.5.16 - 21.10.2026
+- **fix**: Pricing page now shows "/ month" for monthly plans instead of "/ year", and no period for lifetime plans.
+- **fix**: Corrected the "Normally" annual price, which showed the monthly price instead of 12 months of monthly billing.
+- **update**: Savings badges are now shown inside the billing cycle switcher for both annual (vs. monthly) and lifetime (vs. 5 years of annual) plans.
+- **update**: Improved the billing cycle switcher spacing and mobile layout.
+- **security**: Pricing page requests are now limited to the site's own authenticated admin-ajax endpoint.
+
 #### V.2.5.15 - 16.09.2026
 - **fix**: Prevented the "Follow Us" widget from being injected twice inside XT plugin admin pages.
 - **fix**: Restored the Browse Plugins grid layout on modern WordPress by applying the core plugin-install body class.
