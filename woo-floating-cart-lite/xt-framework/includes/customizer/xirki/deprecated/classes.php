@@ -1,6 +1,8 @@
 <?php
 // phpcs:ignoreFile
 
+defined( 'ABSPATH' ) || exit;
+
 if ( ! class_exists( 'Xirki_Active_Callback' ) ) {
 	// Removed in https://github.com/xplodedthemes/xirki/pull/1682/files
 	class Xirki_Active_Callback {

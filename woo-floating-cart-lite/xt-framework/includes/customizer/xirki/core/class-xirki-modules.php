@@ -73,7 +73,6 @@ class Xirki_Modules {
 				'webfont-loader'     => 'Xirki_Modules_Webfont_Loader',
 				'preset'             => 'Xirki_Modules_Preset',
 				'gutenberg'          => 'Xirki_Modules_Gutenberg',
-				'telemetry'          => 'Xirki_Modules_Telemetry',
 			)
 		);
 	}

@@ -731,9 +731,17 @@ abstract class XT_Framework {
             //            $this->access_manager->add_filter('default_currency', function() {
             //                return 'auto';
             //            });
-            $this->access_manager->override_i18n( array(
-                'contact-us' => esc_html__( "Support", 'xt-framework' ),
-            ) );
+            // Translations must not load before init.
+            $override_i18n = function () {
+                $this->access_manager->override_i18n( array(
+                    'contact-us' => esc_html__( "Support", 'xt-framework' ),
+                ) );
+            };
+            if ( did_action( 'init' ) ) {
+                $override_i18n();
+            } else {
+                add_action( 'init', $override_i18n, 0 );
+            }
             // Signal that Freemius SDK was initiated.
             do_action( $this->plugin_short_prefix( 'fs_loaded' ) );
         } else {

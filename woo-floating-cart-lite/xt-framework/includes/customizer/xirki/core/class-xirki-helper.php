@@ -93,10 +93,6 @@ class Xirki_Helper {
 	public static function init_filesystem() {
 		$credentials = array();
 
-		if ( ! defined( 'FS_METHOD' ) ) {
-			define( 'FS_METHOD', 'direct' );
-		}
-
 		$method = defined( 'FS_METHOD' ) ? FS_METHOD : false;
 
 		if ( 'ftpext' === $method ) {

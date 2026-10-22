@@ -186,9 +186,7 @@ if(!class_exists('XT_Framework_Framework_Tabs')) {
 
                 </div>
 
-                <script type="text/javascript">
-                    XT_FOLLOW.init();
-                </script>
+                <div class="xtfw-follow-placeholder"></div>
 
             </div>
 

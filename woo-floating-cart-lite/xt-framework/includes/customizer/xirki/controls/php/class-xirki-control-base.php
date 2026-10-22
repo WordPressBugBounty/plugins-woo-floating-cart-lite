@@ -100,12 +100,12 @@ class Xirki_Control_Base extends WP_Customize_Control {
 		$xirki_url = trailingslashit( Xirki::$url );
 
 		// Enqueue ColorPicker.
-		wp_enqueue_script( 'wp-color-picker-alpha', trailingslashit( Xirki::$url ) . 'assets/vendor/wp-color-picker-alpha/wp-color-picker-alpha.js', array( 'wp-color-picker' ), XIRKI_VERSION, true );
+		wp_enqueue_script( 'wp-color-picker-alpha', trailingslashit( Xirki::$url ) . 'assets/vendor/wp-color-picker-alpha/wp-color-picker-alpha.js', array( 'wp-color-picker' ), '3.0.4', true );
 		wp_enqueue_style( 'wp-color-picker' );
 
 		// Enqueue selectWoo.
-		wp_enqueue_script( 'selectWoo', trailingslashit( Xirki::$url ) . 'assets/vendor/selectWoo/js/selectWoo.full.js', array( 'jquery' ), '1.0.1', true );
-		wp_enqueue_style( 'selectWoo', trailingslashit( Xirki::$url ) . 'assets/vendor/selectWoo/css/selectWoo.css', array(), '1.0.1' );
+		wp_enqueue_script( 'selectWoo', trailingslashit( Xirki::$url ) . 'assets/vendor/selectWoo/js/selectWoo.full.js', array( 'jquery' ), '1.0.10', true );
+		wp_enqueue_style( 'selectWoo', trailingslashit( Xirki::$url ) . 'assets/vendor/selectWoo/css/selectWoo.css', array(), '1.0.10' );
 		wp_enqueue_style( 'xirki-selectWoo', trailingslashit( Xirki::$url ) . 'assets/vendor/selectWoo/xirki.css', array(), XIRKI_VERSION );
 
 		// Enqueue the script.

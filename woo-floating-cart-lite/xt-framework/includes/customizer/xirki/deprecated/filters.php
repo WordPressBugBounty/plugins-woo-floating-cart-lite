@@ -1,6 +1,8 @@
 <?php
 // phpcs:ignoreFile
 
+defined( 'ABSPATH' ) || exit;
+
 add_filter( 'xirki_config', function( $args ) {
 	return apply_filters( 'xirki/config', $args );
 }, 99 );
@@ -89,10 +91,6 @@ add_filter( 'xirki_styles_array', function( $args ) {
 
 add_filter( 'xirki_dynamic_css_method', function( $args ) {
 	return apply_filters( 'xirki/dynamic_css/method', $args );
-}, 99 );
-
-add_filter( 'xirki_postmessage_script', function( $args ) {
-	return apply_filters( 'xirki/postmessage/script', $args );
 }, 99 );
 
 add_filter( 'xirki_fonts_all', function( $args ) {

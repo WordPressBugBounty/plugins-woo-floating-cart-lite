@@ -1,5 +1,5 @@
 /*!
- * SelectWoo 1.0.1
+ * SelectWoo 1.0.10
  * https://github.com/woocommerce/selectWoo
  *
  * Released under the MIT license
@@ -755,6 +755,12 @@ S2.define('select2/utils',[
     });
   };
 
+  Utils.entityDecode = function (html) {
+    var txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+  }
+
   // Append an array of jQuery nodes to a given element.
   Utils.appendMany = function ($element, $nodes) {
     // jQuery 1.7.x does not support $.fn.append() with an array
@@ -1082,6 +1088,12 @@ S2.define('select2/results',[
 
       self.setClasses();
       self.ensureHighlightVisible();
+
+      // NOTE: DOM's version of the object and not jQuery.
+      var searchField = self.$results.parents( '.select2-container' ).find( 'input.select2-search__field' )[0];
+      if ( 'undefined' !== typeof searchField ) {
+           searchField.focus();
+      }
     });
 
     container.on('close', function () {
@@ -1380,8 +1392,13 @@ S2.define('select2/selection/base',[
     var id = container.id + '-container';
     var resultsId = container.id + '-results';
     var searchHidden = this.options.get('minimumResultsForSearch') === Infinity;
+    var isRequired = this.options.get('required') === true;
 
     this.container = container;
+
+    if (isRequired) {
+      this.$selection.attr('aria-required', 'true')
+    }
 
     this.$selection.on('focus', function (evt) {
       self.trigger('focus', evt);
@@ -1424,7 +1441,7 @@ S2.define('select2/selection/base',[
       // This needs to be delayed as the active element is the body when the
       // key is pressed.
       window.setTimeout(function () {
-        self.$selection.focus();
+        self.$selection.trigger( 'focus' );
       }, 1);
 
       self._detachCloseHandler(container);
@@ -1475,8 +1492,14 @@ S2.define('select2/selection/base',[
         }
 
         var $element = $this.data('element');
-
         $element.select2('close');
+
+        // Remove any focus when dropdown is closed by clicking outside the select area.
+        // Timeout of 1 required for close to finish wrapping up.
+        setTimeout(function(){
+         $this.find('*:focus').trigger( 'blur' );
+         $target.trigger( 'focus' );
+        }, 1);
       });
     });
   };
@@ -1535,11 +1558,23 @@ S2.define('select2/selection/single',[
 
     var id = container.id + '-container';
 
+    var isRequired = this.options.get('required') === true;
+    if (isRequired) {
+      this.$selection.find('.select2-selection__rendered').attr('aria-required', 'true')
+    }
+
     this.$selection.find('.select2-selection__rendered')
       .attr('id', id)
       .attr('role', 'textbox')
       .attr('aria-readonly', 'true');
-    this.$selection.attr('aria-labelledby', id);
+
+    var label = this.options.get( 'label' );
+
+    if ( typeof( label ) === 'string' ) {
+      this.$selection.attr( 'aria-label', label );
+    } else {
+      this.$selection.attr( 'aria-labelledby', id );
+    }
 
     // This makes single non-search selects work in screen readers. If it causes problems elsewhere, remove.
     this.$selection.attr('role', 'combobox');
@@ -1572,7 +1607,7 @@ S2.define('select2/selection/single',[
 
     container.on('focus', function (evt) {
       if (!container.isOpen()) {
-        self.$selection.focus();
+        self.$selection.trigger( 'focus' );
       }
     });
 
@@ -1605,9 +1640,9 @@ S2.define('select2/selection/single',[
     var selection = data[0];
 
     var $rendered = this.$selection.find('.select2-selection__rendered');
-    var formatted = this.display(selection, $rendered);
+    var formatted = Utils.entityDecode(this.display(selection, $rendered));
 
-    $rendered.empty().append(formatted);
+    $rendered.empty().text(formatted);
     $rendered.prop('title', selection.title || selection.text);
   };
 
@@ -1668,6 +1703,18 @@ S2.define('select2/selection/multiple',[
         });
       }
     );
+
+    this.$selection.on('keydown', function (evt) {
+      // If user starts typing an alphanumeric key on the keyboard, open if not opened.
+      if (!container.isOpen() && evt.which >= 48 && evt.which <= 90) {
+        container.open();
+      }
+    });
+
+    // Focus on the search field when the container is focused instead of the main container.
+    container.on( 'focus', function(){
+      self.focusOnSearch();
+    });
   };
 
   MultipleSelection.prototype.clear = function () {
@@ -1693,8 +1740,25 @@ S2.define('select2/selection/multiple',[
     return $container;
   };
 
-  MultipleSelection.prototype.update = function (data) {
+  /**
+   * Focus on the search field instead of the main multiselect container.
+   */
+  MultipleSelection.prototype.focusOnSearch = function() {
     var self = this;
+
+    if ('undefined' !== typeof self.$search) {
+      // Needs 1 ms delay because of other 1 ms setTimeouts when rendering.
+      setTimeout(function(){
+        // Prevent the dropdown opening again when focused from this.
+        // This gets reset automatically when focus is triggered.
+        self._keyUpPrevented = true;
+
+        self.$search.trigger( 'focus' );
+      }, 1);
+    }
+  }
+
+  MultipleSelection.prototype.update = function (data) {
     this.clear();
 
     if (data.length === 0) {
@@ -1707,9 +1771,14 @@ S2.define('select2/selection/multiple',[
       var selection = data[d];
 
       var $selection = this.selectionContainer();
-      var formatted = this.display(selection, $selection).trim();
+      var removeItemTag = $selection.html();
+      var formatted = this.display(selection, $selection);
+      if ('string' === typeof formatted) {
+        formatted = Utils.entityDecode(formatted.trim());
+      }
 
-      $selection.append(formatted);
+      $selection.text(formatted);
+      $selection.prepend(removeItemTag);
       $selection.prop('title', selection.title || selection.text);
 
       $selection.data('data', selection);
@@ -1720,14 +1789,6 @@ S2.define('select2/selection/multiple',[
     var $rendered = this.$selection.find('.select2-selection__rendered');
 
     Utils.appendMany($rendered, $selections);
-
-    // Return cursor to search field after updating.
-    // Needs 1 ms delay because of other 1 ms setTimeouts when rendering.
-    if ('undefined' !== typeof this.$search) {
-      setTimeout(function(){
-        self.$search.focus();
-      }, 1);
-    }
   };
 
   return MultipleSelection;
@@ -1756,7 +1817,7 @@ S2.define('select2/selection/placeholder',[
   Placeholder.prototype.createPlaceholder = function (decorated, placeholder) {
     var $placeholder = this.selectionContainer();
 
-    $placeholder.html(this.display(placeholder));
+    $placeholder.text(Utils.entityDecode(this.display(placeholder)));
     $placeholder.addClass('select2-selection__placeholder')
                 .removeClass('select2-selection__choice');
 
@@ -1894,7 +1955,7 @@ S2.define('select2/selection/search',[
     var $search = $(
       '<li class="select2-search select2-search--inline">' +
         '<input class="select2-search__field" type="text" tabindex="-1"' +
-        ' autocomplete="off" autocorrect="off" autocapitalize="off"' +
+        ' autocomplete="off" autocorrect="off" autocapitalize="none"' +
         ' spellcheck="false" role="textbox" aria-autocomplete="list" />' +
       '</li>'
     );
@@ -1973,6 +2034,9 @@ S2.define('select2/selection/search',[
 
           evt.preventDefault();
         }
+      } else if (evt.which === KEYS.ENTER) {
+        container.open();
+        evt.preventDefault();
       }
     });
 
@@ -2061,7 +2125,7 @@ S2.define('select2/selection/search',[
 
     this.resizeSearch();
     if (searchHadFocus) {
-      this.$search.focus();
+      this.$search.trigger( 'focus' );
     }
   };
 
@@ -3499,7 +3563,7 @@ S2.define('select2/data/ajax',[
 
     if (this._request != null) {
       // JSONP requests cannot always be aborted
-      if ($.isFunction(this._request.abort)) {
+      if ('function' === typeof this._request.abort) {
         this._request.abort();
       }
 
@@ -3524,7 +3588,7 @@ S2.define('select2/data/ajax',[
 
         if (self.options.get('debug') && window.console && console.error) {
           // Check to make sure that the response included a `results` key.
-          if (!results || !results.results || !$.isArray(results.results)) {
+          if (!results || !results.results || !Array.isArray(results.results)) {
             console.error(
               'Select2: The AJAX results did not return an array in the ' +
               '`results` key of the response.'
@@ -3583,7 +3647,7 @@ S2.define('select2/data/tags',[
 
     decorated.call(this, $element, options);
 
-    if ($.isArray(tags)) {
+    if (Array.isArray(tags)) {
       for (var t = 0; t < tags.length; t++) {
         var tag = tags[t];
         var item = this._normalizeItem(tag);
@@ -3659,7 +3723,7 @@ S2.define('select2/data/tags',[
   };
 
   Tags.prototype.createTag = function (decorated, params) {
-    var term = $.trim(params.term);
+    var term = ( params.term || 0 == params.term ) ? params.term.toString().trim() : '';
 
     if (term === '') {
       return null;
@@ -3752,7 +3816,7 @@ S2.define('select2/data/tokenizer',[
       // Replace the search term if we have the search box
       if (this.$search.length) {
         this.$search.val(tokenData.term);
-        this.$search.focus();
+        this.$search.trigger( 'focus' );
       }
 
       params.term = tokenData.term;
@@ -3959,7 +4023,7 @@ S2.define('select2/dropdown/search',[
     var $search = $(
       '<span class="select2-search select2-search--dropdown">' +
         '<input class="select2-search__field" type="text" tabindex="-1"' +
-        ' autocomplete="off" autocorrect="off" autocapitalize="off"' +
+        ' autocomplete="off" autocorrect="off" autocapitalize="none"' +
         ' spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="true" />' +
       '</span>'
     );
@@ -3999,10 +4063,10 @@ S2.define('select2/dropdown/search',[
     container.on('open', function () {
       self.$search.attr('tabindex', 0);
       self.$search.attr('aria-owns', resultsId);
-      self.$search.focus();
+      self.$search.trigger( 'focus' );
 
       window.setTimeout(function () {
-        self.$search.focus();
+        self.$search.trigger( 'focus' );
       }, 0);
     });
 
@@ -4014,8 +4078,8 @@ S2.define('select2/dropdown/search',[
     });
 
     container.on('focus', function () {
-      if (container.isOpen()) {
-        self.$search.focus();
+      if (!container.isOpen()) {
+        self.$search.trigger( 'focus' );
       }
     });
 
@@ -4357,7 +4421,6 @@ S2.define('select2/dropdown/attachBody',[
 
     var parentOffset = $offsetParent.offset();
 
-    css.top -= parentOffset.top;
     css.left -= parentOffset.left;
 
     if (!isCurrentlyAbove && !isCurrentlyBelow) {
@@ -4372,7 +4435,7 @@ S2.define('select2/dropdown/attachBody',[
 
     if (newDirection == 'above' ||
       (isCurrentlyAbove && newDirection !== 'below')) {
-      css.top = container.top - parentOffset.top - dropdown.height;
+      css.top = container.top - dropdown.height;
     }
 
     if (newDirection != null) {
@@ -4830,7 +4893,7 @@ S2.define('select2/defaults',[
       }
     }
 
-    if ($.isArray(options.language)) {
+    if (Array.isArray(options.language)) {
       var languages = new Translation();
       options.language.push('en');
 
@@ -4893,7 +4956,7 @@ S2.define('select2/defaults',[
 
     function matcher (params, data) {
       // Always return the object if there is nothing to compare
-      if ($.trim(params.term) === '') {
+      if ( params.term == null || params.term.toString().trim() === '' ) {
         return data;
       }
 
@@ -5014,6 +5077,10 @@ S2.define('select2/options',[
 
     if (this.options.disabled == null) {
       this.options.disabled = $e.prop('disabled');
+    }
+
+    if (!this.options.required) {
+      this.options.required = $e.prop('required');
     }
 
     if (this.options.language == null) {
@@ -5432,12 +5499,11 @@ S2.define('select2/core',[
     $(document).on('keydown', function (evt) {
       var key = evt.which;
       if (self.isOpen()) {
-        if (key === KEYS.ESC || key === KEYS.TAB ||
-            (key === KEYS.UP && evt.altKey)) {
+        if (key === KEYS.ESC || (key === KEYS.UP && evt.altKey)) {
           self.close();
 
           evt.preventDefault();
-        } else if (key === KEYS.ENTER) {
+        } else if (key === KEYS.ENTER || key === KEYS.TAB) {
           self.trigger('results:select', {});
 
           evt.preventDefault();
@@ -5455,27 +5521,27 @@ S2.define('select2/core',[
           evt.preventDefault();
         }
 
+        var $searchField = self.$dropdown.find('.select2-search__field');
+        if (! $searchField.length) {
+          $searchField = self.$container.find('.select2-search__field');
+        }
+
         // Move the focus to the selected element on keyboard navigation.
         // Required for screen readers to work properly.
         if (key === KEYS.DOWN || key === KEYS.UP) {
             self.focusOnActiveElement();
         } else {
           // Focus on the search if user starts typing.
-          var $searchField = self.$dropdown.find('.select2-search__field');
-          if (! $searchField.length) {
-            $searchField = self.$container.find('.select2-search__field');
-          }
-          $searchField.focus();
+          $searchField.trigger( 'focus' );
           // Focus back to active selection when finished typing.
           // Small delay so typed character can be read by screen reader.
           setTimeout(function(){
               self.focusOnActiveElement();
           }, 1000);
         }
-
       } else if (self.hasFocus()) {
         if (key === KEYS.ENTER || key === KEYS.SPACE ||
-            (key === KEYS.DOWN && evt.altKey)) {
+            key === KEYS.DOWN) {
           self.open();
           evt.preventDefault();
         }
@@ -5485,8 +5551,8 @@ S2.define('select2/core',[
 
   Select2.prototype.focusOnActiveElement = function () {
     // Don't mess with the focus on touchscreens because it causes havoc with on-screen keyboards.
-    if (! Utils.isTouchscreen()) {
-      this.$results.find('li.select2-results__option--highlighted').focus();
+    if (this.isOpen() && ! Utils.isTouchscreen()) {
+      this.$results.find('li.select2-results__option--highlighted').trigger( 'focus' );
     }
   };
 
@@ -5677,7 +5743,7 @@ S2.define('select2/core',[
 
     var newVal = args[0];
 
-    if ($.isArray(newVal)) {
+    if (Array.isArray(newVal)) {
       newVal = $.map(newVal, function (obj) {
         return obj.toString();
       });
@@ -5754,7 +5820,7 @@ S2.define('select2/compat/utils',[
   function syncCssClasses ($dest, $src, adapter) {
     var classes, replacements = [], adapted;
 
-    classes = $.trim($dest.attr('class'));
+    classes = ( $dest.attr('class') || 0 == $dest.attr('class') ) ? $dest.attr('class').toString().trim() : '';
 
     if (classes) {
       classes = '' + classes; // for IE which returns object
@@ -5767,7 +5833,7 @@ S2.define('select2/compat/utils',[
       });
     }
 
-    classes = $.trim($src.attr('class'));
+    classes = ( $src.attr('class') || 0 == $src.attr('class') ) ? $src.attr('class').toString().trim() : '';
 
     if (classes) {
       classes = '' + classes; // for IE which returns object
@@ -5808,7 +5874,7 @@ S2.define('select2/compat/containerCss',[
 
     var containerCssClass = this.options.get('containerCssClass') || '';
 
-    if ($.isFunction(containerCssClass)) {
+    if ('function' === typeof containerCssClass) {
       containerCssClass = containerCssClass(this.$element);
     }
 
@@ -5834,7 +5900,7 @@ S2.define('select2/compat/containerCss',[
 
     var containerCss = this.options.get('containerCss') || {};
 
-    if ($.isFunction(containerCss)) {
+    if ('function' === typeof containerCss) {
       containerCss = containerCss(this.$element);
     }
 
@@ -5865,7 +5931,7 @@ S2.define('select2/compat/dropdownCss',[
 
     var dropdownCssClass = this.options.get('dropdownCssClass') || '';
 
-    if ($.isFunction(dropdownCssClass)) {
+    if ('function' === typeof dropdownCssClass) {
       dropdownCssClass = dropdownCssClass(this.$element);
     }
 
@@ -5891,7 +5957,7 @@ S2.define('select2/compat/dropdownCss',[
 
     var dropdownCss = this.options.get('dropdownCss') || {};
 
-    if ($.isFunction(dropdownCss)) {
+    if ('function' === typeof dropdownCss) {
       dropdownCss = dropdownCss(this.$element);
     }
 
@@ -5938,7 +6004,7 @@ S2.define('select2/compat/initSelection',[
     this.initSelection.call(null, this.$element, function (data) {
       self._isInitialized = true;
 
-      if (!$.isArray(data)) {
+      if (!Array.isArray(data)) {
         data = [data];
       }
 
@@ -6084,7 +6150,7 @@ S2.define('select2/compat/matcher',[
     function wrappedMatcher (params, data) {
       var match = $.extend(true, {}, data);
 
-      if (params.term == null || $.trim(params.term) === '') {
+      if ( params.term == null || params.term.trim() === '' ) {
         return match;
       }
 
@@ -6327,11 +6393,11 @@ S2.define('select2/selection/stopPropagation',[
 
     $.fn.extend({
         mousewheel: function(fn) {
-            return fn ? this.bind('mousewheel', fn) : this.trigger('mousewheel');
+            return fn ? this.on('mousewheel', fn) : this.trigger('mousewheel');
         },
 
         unmousewheel: function(fn) {
-            return this.unbind('mousewheel', fn);
+            return this.off('mousewheel', fn);
         }
     });
 

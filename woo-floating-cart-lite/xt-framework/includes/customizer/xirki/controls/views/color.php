@@ -9,6 +9,8 @@
  * @since       3.0.17
  */
 
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <#
 data = _.defaults( data, {
@@ -40,6 +42,7 @@ data = _.defaults( data, {
 		data-palette="{{ data['data-palette'] }}"
 		data-default-color="{{ data['data-default-color'] }}"
 		data-alpha="{{ data['data-alpha'] }}"
+		data-alpha-enabled="{{ data['data-alpha'] }}"
 		value="{{ data.value }}"
 		class="xirki-color-control"
 		data-id="{{ data['data-id'] }}"

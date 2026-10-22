@@ -71,7 +71,9 @@ if ( ! class_exists( 'XT_Framework_Review_Notice' ) ) {
 
             $this->core = $core;
 
-            $this->review_url = 'https://wordpress.org/support/plugin/'.$this->core->plugin()->market_product()->freemium_slug.'/reviews/?rate=5&filter=5/#new-post';
+            $market_product   = $this->core->plugin()->market_product();
+            $wporg_slug       = ! empty( $market_product->wporg_slug ) ? $market_product->wporg_slug : $market_product->freemium_slug;
+            $this->review_url = 'https://wordpress.org/support/plugin/' . $wporg_slug . '/reviews/#new-post';
 
             // Add Ajax Events
             add_filter($this->core->plugin_prefix('ajax_add_events'), array($this, 'ajax_add_events'), 1);

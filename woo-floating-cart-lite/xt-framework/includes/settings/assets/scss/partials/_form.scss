@@ -334,7 +334,7 @@
 		input[type=time],
 		input[type=url],
 		input[type=week],
-		textarea,
+		textarea:not(.select2-search__field),
 		select{
 			min-width:inherit!important;
 			width:100%!important;

@@ -44,7 +44,7 @@ if(!class_exists('XT_Framework_Customizer_Options')) {
 		 */
 		public static function get_menu_options() {
 
-			$terms = get_terms( 'nav_menu', array( 'hide_empty' => false ) );
+			$terms = get_terms( array( 'taxonomy' => 'nav_menu', 'hide_empty' => false ) );
 			$menu_options = array();
 
 			foreach ( $terms as $term ) {

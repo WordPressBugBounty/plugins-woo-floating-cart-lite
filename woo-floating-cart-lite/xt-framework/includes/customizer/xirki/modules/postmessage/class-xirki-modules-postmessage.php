@@ -71,9 +71,5 @@ class Xirki_Modules_PostMessage {
 			}
 		}
 		wp_localize_script( 'xirki_auto_postmessage', 'xirkiPostMessageFields', $data );
-		$extras = apply_filters( 'xirki_postmessage_script', false );
-		if ( $extras ) {
-			wp_add_inline_script( 'xirki_auto_postmessage', $extras, 'after' );
-		}
 	}
 }

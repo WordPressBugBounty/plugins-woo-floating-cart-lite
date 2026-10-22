@@ -157,6 +157,7 @@ if(!class_exists('XT_Framework_Admin_Tabs')) {
 
             wp_enqueue_style( 'xt-follow' );
             wp_enqueue_script( 'xt-follow' );
+            wp_add_inline_script( 'xt-follow', 'document.addEventListener("DOMContentLoaded",function(){if(window.XT_FOLLOW&&document.querySelector(".xtfw-follow-placeholder")){XT_FOLLOW.init(undefined,undefined,".xtfw-follow-placeholder");}});' );
 
             wp_add_inline_script('xtfw-inline', '
             

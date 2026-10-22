@@ -82,9 +82,6 @@ if ( ! class_exists( 'XT_Framework_Ajax' )) {
             if ( ! empty( $_GET['xtfw-ajax'] ) ) {
                 xtfw_maybe_define_constant( 'DOING_AJAX', true );
                 xtfw_maybe_define_constant( 'XTFW_DOING_AJAX', true );
-                if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
-                    @ini_set( 'display_errors', 0 ); // Turn off display_errors during AJAX events to prevent malformed JSON.
-                }
                 $GLOBALS['wpdb']->hide_errors();
             }
             // phpcs:enable
@@ -187,7 +184,6 @@ if ( ! class_exists( 'XT_Framework_Ajax' )) {
          * Get a refreshed ajax fragment
          */
         public function get_refreshed_fragments() {
-            ob_start();
 
             $data = apply_filters('xtfw_ajax_fragments', array());
 

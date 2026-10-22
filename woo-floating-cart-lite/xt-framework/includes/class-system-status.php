@@ -326,10 +326,10 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
             $version   = '';
 
             if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] ) {
-                $version = _cleanup_header_comment( $match[1] );
+                $version = trim( preg_replace( '/\s*(?:\*\/|\?>).*/', '', $match[1] ) );
             }
             if ( empty($version) && preg_match( '/^[ \t\/*#@]*' . preg_quote( '@since', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] ) {
-                $version = _cleanup_header_comment( $match[1] );
+                $version = trim( preg_replace( '/\s*(?:\*\/|\?>).*/', '', $match[1] ) );
             }
 
             return $version;
@@ -407,7 +407,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                 $overrides[ $plugin_name ]['overrides'][] = array(
                                     'plugin_name'  => $instance->plugin_name(),
                                     'plugin_slug'  => $instance->plugin_slug(),
-                                    'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ),
+                                    'file'         => str_replace( trailingslashit( get_theme_root() ), '', $theme_file ),
                                     'version'      => $theme_version,
                                     'core_version' => $core_version,
                                 );
@@ -461,7 +461,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
             $recommended_memory = 134217728;
             $output_ip          = 'n/a';
 
-            if ( apply_filters( 'xt_framework_system_status_check_ip', true ) ) {
+            if ( apply_filters( 'xt_framework_system_status_check_ip', false ) ) {
 
                 // Using 3rd party api service (https://api.ipify.org) to retrieve client IP to be displayed in system info page
                 $ip_response = wp_safe_remote_get( 'https://api.ipify.org', array( 'timeout' => 5 ) );
@@ -533,7 +533,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                         </tr>
                     </table>
 
-                    <h3><?php echo esc_html__( 'Active XT Plugins', 'xt-framework' ); ?><?php echo (is_network_admin() ? ' <span class="xtfw-heading-badge">'.esc_html__('Network Activated').'</span>' : ''); ?></h3>
+                    <h3><?php echo esc_html__( 'Active XT Plugins', 'xt-framework' ); ?><?php echo (is_network_admin() ? ' <span class="xtfw-heading-badge">'.esc_html__( 'Network Activated', 'xt-framework' ).'</span>' : ''); ?></h3>
                     <?php if(count($this->core->instances())):?>
                         <table class="widefat striped xt-plugins-table">
                             <thead>
@@ -592,7 +592,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                     <?php else : ?>
                         <table class="widefat striped xt-module-na" cellspacing="0">
                             <tr>
-                                <td class="requirement-name" data-export-label="XT Modules"><?php esc_html_e( 'No Active XT Plugins Found', 'xt-framework'); ?> <?php echo (is_network_admin() ? esc_html__('at the Network Level') : ''); ?></td>
+                                <td class="requirement-name" data-export-label="XT Modules"><?php esc_html_e( 'No Active XT Plugins Found', 'xt-framework'); ?> <?php echo (is_network_admin() ? esc_html__( 'at the Network Level', 'xt-framework' ) : ''); ?></td>
                             </tr>
                         </table>
                     <?php endif; ?>
@@ -1100,7 +1100,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
 
             $tls = 'n/a';
 
-            if ( apply_filters( 'xt_framework_system_status_check_ssl', true ) ) {
+            if ( apply_filters( 'xt_framework_system_status_check_ssl', false ) ) {
 
                 // Using 3rd party api service (https://www.howsmyssl.com/a/check) to retrieve client TLS version to be displayed in system info page
                 $tls_response = wp_safe_remote_get( 'https://www.howsmyssl.com/a/check', array( 'timeout' => 5 ) );

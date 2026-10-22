@@ -376,10 +376,9 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
 
             $slug = str_replace('-lite', '', $slug);
 
-            $active_plugins = wp_cache_get('active_plugins');
-            if($active_plugins === false) {
-                $active_plugins = apply_filters('active_plugins', get_option('active_plugins'));
-                wp_cache_set('active_plugins', $active_plugins);
+            static $active_plugins = null;
+            if ( null === $active_plugins ) {
+                $active_plugins = (array) apply_filters( 'active_plugins', get_option( 'active_plugins', array() ) );
             }
 
             foreach ( $active_plugins as $plugin ) {

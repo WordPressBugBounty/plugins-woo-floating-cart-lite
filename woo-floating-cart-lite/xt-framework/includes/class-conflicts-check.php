@@ -43,15 +43,15 @@ if ( ! class_exists( 'XT_Framework_Conflicts_Check' ) ) {
 
 			$this->conflicts = $core->plugin()->conflicts();
 
-			add_action( 'admin_init', array( $this, 'disable_conflicted_plugins' ));
+			add_action( 'admin_init', array( $this, 'check_conflicted_plugins' ));
 		}
 
 		/**
-		 * Check if conflict plugins are active, if yes, disabled them and show error notice
+		 * Check if conflicting plugins are active and show a notice. Plugins are never deactivated automatically.
 		 *
 		 * @since    1.0.0
 		 */
-		public function disable_conflicted_plugins() {
+		public function check_conflicted_plugins() {
 
 			$failed = array();
 			foreach ( $this->conflicts as $key => $item ) {
@@ -64,8 +64,6 @@ if ( ! class_exists( 'XT_Framework_Conflicts_Check' ) ) {
 			}
 
 			if ( ! empty( $failed ) ) {
-
-				deactivate_plugins( $failed );
 
 				$this->render_conflicts_notices();
 
@@ -86,7 +84,7 @@ if ( ! class_exists( 'XT_Framework_Conflicts_Check' ) ) {
 				if ( ! empty( $item->failed ) ) {
 
 					$this->core->plugin_notices()->add_warning_message( sprintf(
-						esc_html__( '%1$s has been disabled since it cannot be active while using %2$s!', 'xt-framework' ),
+						esc_html__( '%1$s conflicts with %2$s. Please deactivate %1$s to avoid issues.', 'xt-framework' ),
 						'<strong>' . $item->name . '</strong>',
 						'<strong>' . $this->core->plugin_name() . '</strong>'
 					) );

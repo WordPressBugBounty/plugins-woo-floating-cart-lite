@@ -632,6 +632,7 @@ if(!class_exists('XT_Framework_Settings')) {
         public function ajax_refresh_preview() {
 
             $this->verify_settings_request( true );
+            check_ajax_referer( $this->core->plugin_prefix( 'settings_save_verify' ) );
 
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified immediately above.
             $preview_id = isset( $_POST['preview'] ) && is_scalar( $_POST['preview'] ) ? sanitize_key( wp_unslash( $_POST['preview'] ) ) : '';
@@ -1247,6 +1248,11 @@ if(!class_exists('XT_Framework_Settings')) {
                     default:
                         $value = xtfw_clean( $raw_value );
                         break;
+                }
+
+                // Custom field types sanitize their own values; only pass them input that has already been through wp_kses_post().
+                if ( null !== $raw_value ) {
+                    $raw_value = map_deep( $raw_value, 'wp_kses_post' );
                 }
 
                 /**

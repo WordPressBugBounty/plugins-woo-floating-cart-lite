@@ -9,6 +9,8 @@
  * @since       3.0.34
  */
 
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <#
 data = _.defaults( data, {

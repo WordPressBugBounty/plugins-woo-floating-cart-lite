@@ -9,6 +9,8 @@
  * @since       3.0.17
  */
 
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <#
 element = ( data.choices.element ) ? data.choices.element : 'input';

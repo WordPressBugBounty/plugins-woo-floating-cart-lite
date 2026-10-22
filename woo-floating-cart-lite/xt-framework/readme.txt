@@ -16,6 +16,19 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.5.17 - 21.10.2026
+- **security**: Settings preview requests verify their nonce directly, and values passed to custom field sanitize filters are now run through wp_kses_post() first.
+- **privacy**: The System Status IP and TLS lookups (api.ipify.org, howsmyssl.com) are now off by default and only run when enabled with the `xt_framework_system_status_check_ip` / `xt_framework_system_status_check_ssl` filters.
+- **privacy**: Removed the Xirki telemetry module.
+- **update**: Conflicting plugins are no longer deactivated automatically; an admin notice asks to deactivate them instead.
+- **update**: The review link now opens the plugin's full WordPress.org reviews page, and supports a separate `wporg_slug`.
+- **update**: Updated Select2 to 4.1.0, SelectWoo to 1.0.10 and wp-color-picker-alpha to 3.0.4; removed unused Select2 copies from Xirki.
+- **fix**: Removed the global FS_METHOD definition from Xirki, the forced display_errors change and an unclosed output buffer in AJAX requests, and the generic `active_plugins` object-cache key.
+- **fix**: Follow Us widget scripts are now enqueued instead of printed inline; replaced a deprecated get_terms() call and the hardcoded themes path in System Status; added missing text domains.
+- **fix**: Added direct file access guards to Xirki control templates, replaced a private WordPress function in System Status, and deferred a Freemius menu label translation until init.
+- **fix**: Adjusted the settings Select2 styles for the 4.1 markup so multi-selects look and behave as before.
+- **build**: Added a WordPress.org package builder (text domain rewrite and development-file cleanup).
+
 #### V.2.5.16 - 21.10.2026
 - **fix**: Pricing page now shows "/ month" for monthly plans instead of "/ year", and no period for lifetime plans.
 - **fix**: Corrected the "Normally" annual price, which showed the monthly price instead of 12 months of monthly billing.
