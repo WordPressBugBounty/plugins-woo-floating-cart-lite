@@ -1,10 +1,11 @@
 <?php
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside an XTFW_Settings method; these variables are local to it.
 /**
  * Template for displaying the multi select countries field
  *
  * @var array $field The field.
  *
- * @package XT_Framework_Settings\Fields
+ * @package XTFW_Settings\Fields
  */
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
@@ -29,7 +30,7 @@ asort( $countries );
             <?php
             if ( ! empty( $countries ) ) {
                 foreach ( $countries as $key => $val ) {
-                    echo '<option value="' . esc_attr( $key ) . '" ' . xtfw_selected( $key, $selections ) . '>' . esc_html( $val ) . '</option>'; // WPCS: XSS ok.
+                    echo '<option value="' . esc_attr( $key ) . '" ' . selected( in_array( (string) $key, array_map( 'strval', $selections ), true ), true, false ) . '>' . esc_html( $val ) . '</option>';
                 }
             }
             ?>

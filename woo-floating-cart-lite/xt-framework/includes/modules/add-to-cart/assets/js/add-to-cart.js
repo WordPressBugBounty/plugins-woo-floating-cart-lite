@@ -232,7 +232,7 @@
 
                 var $row = $(this);
 
-                if ($row.is(':visible')) {
+                if (isFieldRowShown($row)) {
                     var $input = $row.find(':input');
 
                     if ($input.attr('type') === 'checkbox' || $input.attr('type') === 'radio') {
@@ -263,6 +263,20 @@
             }
 
             return (errors === 0);
+        }
+
+        function isFieldRowShown($row) {
+
+            if (!$row.is(':visible')) {
+                return false;
+            }
+
+            // Conditionally hidden fields can stay in the layout with visibility:hidden (e.g. PPOM's .ppom-c-hide)
+            if ($row.closest('.ppom-c-hide').length) {
+                return false;
+            }
+
+            return window.getComputedStyle($row.get(0)).visibility !== 'hidden';
         }
 
         function skipSingleAddToCart(trigger) {

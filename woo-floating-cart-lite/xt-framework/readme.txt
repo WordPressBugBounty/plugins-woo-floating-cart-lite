@@ -16,6 +16,33 @@ It takes care of basic plugin hooks, admin tabs, customizer fields, plugin setti
 
 == Changelog ==
 
+#### V.2.6.0 - 07.11.2026
+- **new**: Cart bridge for block stores. When products are added or removed with WooCommerce blocks (Product Button, Add to Cart with Options, the Mini Cart), the cart fragments are refreshed and the classic added_to_cart and wc_fragments_refreshed events are fired, so the Floating Cart and other XT features update right away instead of after a page reload.
+- **update**: The storefront no longer loads jQuery in the page head for the framework's touch detection, which is now a small script without dependencies. The add to cart module and the ajax queue helper load in the footer.
+- **dev**: Plugins can declare Cart and Checkout blocks compatibility with the wc_cart_checkout_blocks parameter. Nothing is declared by default.
+
+#### V.2.5.20 - 05.11.2026
+- **fix**: Ajax add to cart no longer blocks single products whose required add-on field is conditionally hidden. Fields hidden with visibility:hidden, such as PPOM conditional fields, are now skipped by the required-field check instead of stopping the request without a message.
+
+#### V.2.5.19 - 27.10.2026
+- **update**: Framework classes now use the XTFW_ prefix (XT_Framework is now XTFW_Framework, XT_Framework_Settings is now XTFW_Settings, and so on). The old class names are registered as aliases, so plugins bundling an older framework copy keep working.
+- **update**: Xirki's ariColor class is now Xirki_AriColor, and the wp_is_json_request() / wp_get_registered_image_subsizes() fallbacks are now xtfw_is_json_request() / xtfw_get_registered_image_subsizes().
+- **update**: System Status no longer contacts How's My SSL or ipify: TLS support is read from the local cURL build and the server IP from the request. The xt_framework_system_* option and filters are renamed to xtfw_system_*.
+- **security**: Generated settings, Xirki and CSS-variable styles are sanitized where they are added to the page, Freemius account and checkout templates are passed back to the SDK instead of being echoed by the framework, and attribute helpers escape each value as it is printed.
+- **fix**: Two admin.css rules no longer apply outside XT screens (the Freemius promo tab and WooCommerce option groups).
+- **dev**: Loader functions moved to includes/functions-loader.php and Freemius checkout purchase tracking to includes/class-checkout-tracking.php.
+- **build**: WordPress.org packages use their own loader (src/wporg/start.php): each bundled copy registers itself and the newest one loads on plugins_loaded, without reordering active plugins. They also leave out the legacy loader files and checkout tracking, and the build fails if the package still contains any of them.
+
+#### V.2.5.18 - 22.10.2026
+- **security**: Output in metabox, settings and customizer fields is escaped where it is printed, and request values read for admin routing are unslashed and sanitized.
+- **fix**: Redirects that stay inside the site's own admin now use wp_safe_redirect().
+- **fix**: Numbered placeholders and translator comments for all translatable strings with placeholders.
+- **fix**: Scripts state explicitly that they load in the header (no change in where they load).
+- **fix**: The framework loader's global variables now use the xtfw_ prefix.
+- **update**: The review request no longer asks for a 5-star rating.
+- **build**: The WordPress.org package builder moves the unmodified Freemius SDK to vendor/freemius, where the WordPress.org upload scanner accepts it.
+- **dev**: Clean WordPress.org Plugin Check report; the few intentional exceptions are documented next to the code.
+
 #### V.2.5.17 - 21.10.2026
 - **security**: Settings preview requests verify their nonce directly, and values passed to custom field sanitize filters are now run through wp_kses_post() first.
 - **privacy**: The System Status IP and TLS lookups (api.ipify.org, howsmyssl.com) are now off by default and only run when enabled with the `xt_framework_system_status_check_ip` / `xt_framework_system_status_check_ssl` filters.

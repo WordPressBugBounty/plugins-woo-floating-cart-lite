@@ -7,7 +7,7 @@ Author URI: https://www.xplodedthemes.com
 Tags: floating cart, woocommerce side cart, ajax add to cart, mini cart, upsell
 Requires at least: 4.6
 Tested up to: 7.1
-Stable tag: 2.8.14
+Stable tag: 2.8.15
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -105,6 +105,10 @@ Installing "Floating Cart for WooCommerce" can be done by following these steps:
 3. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+#### V.2.8.15 - 2026-11-07
+- **new**: The cart now updates right away on stores using WooCommerce blocks. Products added with the block Add to cart buttons or removed from the Mini Cart block show in the floating cart without a page reload
+- **update**: XT Framework 2.6.0: a cart bridge for WooCommerce blocks, jQuery is no longer loaded in the page head for touch detection, and the add to cart scripts load in the footer. Includes 2.5.18 to 2.5.20: output escaping and safe redirects, framework classes renamed with the XTFW_ prefix (the old names still work), System Status no longer contacts external services, the bundled Freemius SDK updated to 2.13.5, and ajax add to cart no longer blocked by conditionally hidden required add-on fields
 
 #### V.2.8.14 - 2026-10-21
 - **update**: XT Framework 2.5.17, making the System Status IP and TLS lookups opt-in, updating Select2 to 4.1.0, SelectWoo to 1.0.10 and the alpha color picker to 3.0.4, removing the unused Xirki telemetry module, and hardening settings preview requests and saved settings values

@@ -3,24 +3,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if(!class_exists('XT_Framework_Customizer')) {
+if(!class_exists('XTFW_Customizer')) {
 
     /**
      * Class that takes care of rendering common message blocks
      *
      * @since      1.0.0
-     * @package    XT_Framework
-     * @subpackage XT_Framework/includes
+     * @package    XTFW_Framework
+     * @subpackage XTFW_Framework/includes
      * @author     XplodedThemes
      */
-    class XT_Framework_Customizer {
+    class XTFW_Customizer {
 
         /**
          * Core class reference.
          *
          * @since    1.0.0
          * @access   private
-         * @var      XT_Framework    $core    Core Class
+         * @var      XTFW_Framework    $core    Core Class
          */
         protected $core;
 
@@ -29,7 +29,7 @@ if(!class_exists('XT_Framework_Customizer')) {
 	     *
 	     * @since    1.0.0
 	     * @access   private
-	     * @var      XT_Framework_Module|null    $module    Module Class
+	     * @var      XTFW_Module|null    $module    Module Class
 	     */
         protected $module;
 	    protected $is_module;
@@ -108,9 +108,13 @@ if(!class_exists('XT_Framework_Customizer')) {
 
         public function apply_filters() {
 
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             $this->breakpoints = apply_filters($this->prefix('customizer_breakpoints'), $this->breakpoints, $this);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             $this->panels = apply_filters($this->prefix('customizer_panels'), $this->panels, $this);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             $this->sections = apply_filters($this->prefix('customizer_sections'), $this->sections, $this);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             $this->fields = apply_filters($this->prefix('customizer_fields'), $this->fields, $this);
         }
 
@@ -137,7 +141,7 @@ if(!class_exists('XT_Framework_Customizer')) {
             $controls   = glob( dirname( __FILE__ ) . '/controls/*/*.php' );
             $controls = apply_filters('xtfw_customizer_controls', $controls);
 
-            new XT_Framework_Customizer_Controls( $controls, $wp_customize );
+            new XTFW_Customizer_Controls( $controls, $wp_customize );
         }
 
 	    /**
@@ -509,7 +513,7 @@ if(!class_exists('XT_Framework_Customizer')) {
                     $customizer = $module->customizer();
 
                     if(!empty($this->panels)) {
-                        echo '<h4 class="xtfw-modules-title">' . esc_html($module->menu_name()) . ' <span class="xtfw-badge xtfw-badge-blue">'.__('Shared Module', 'xt-framework').'</span></h4>';
+                        echo '<h4 class="xtfw-modules-title">' . esc_html($module->menu_name()) . ' <span class="xtfw-badge xtfw-badge-blue">' . esc_html__( 'Shared Module', 'xt-framework' ) . '</span></h4>';
                     }
 
                     $this->render_customizer_tab_panels($customizer);
@@ -704,9 +708,11 @@ if(!class_exists('XT_Framework_Customizer')) {
 
 	            $value = Xirki::get_option( $config_id, $id );
 
+	            // phpcs:disable WordPress.Security.NonceVerification.Missing -- Customizer preview data; WordPress core verifies the Customizer request.
 	            if ( ! empty( $_POST['customized'] ) ) {
 
-		            $options = json_decode( stripslashes( sanitize_text_field( $_POST['customized'] )), true );
+		            $options = json_decode( sanitize_text_field( wp_unslash( $_POST['customized'] ) ), true );
+	            // phpcs:enable WordPress.Security.NonceVerification.Missing
 
                     if ( isset( $options[ $config_id . '[' . $id . ']' ] ) ) {
 
@@ -721,6 +727,7 @@ if(!class_exists('XT_Framework_Customizer')) {
                 }
             }
 
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own ID.
             return apply_filters( $this->config_id(). '_customizer_option', $value, $id, $default, $this->config_id() );
         }
 
@@ -776,7 +783,8 @@ if(!class_exists('XT_Framework_Customizer')) {
                 $handle,
                 xtfw_dir_url(XTFW_DIR_CUSTOMIZER_ASSETS) . '/js/customizer-controls'.XTFW_SCRIPT_SUFFIX.'.js',
                 array(),
-                $this->core->framework_version()
+                $this->core->framework_version(),
+                false
             );
 
             wp_localize_script( $handle, 'XTFW_CUSTOMIZER_CTRL', array(
@@ -800,7 +808,9 @@ if(!class_exists('XT_Framework_Customizer')) {
                 );
             }
 
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only flag that loads an extra stylesheet.
             if(!empty($_GET['premium_css'])) {
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
                 wp_enqueue_style(
                     $handle.'-premium',
                     xtfw_dir_url(XTFW_DIR_CUSTOMIZER_ASSETS) . '/css/customizer-controls-premium.css',
@@ -809,6 +819,7 @@ if(!class_exists('XT_Framework_Customizer')) {
                 );
             }
 
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action( $this->prefix( 'customizer_controls_assets' ), $handle );
 
         }
@@ -1006,7 +1017,13 @@ if(!class_exists('XT_Framework_Customizer')) {
         }
 
 
-    } // End Class
+    }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Customizer', false ) ) {
+    	class_alias( 'XTFW_Customizer', 'XT_Framework_Customizer' );
+    }
+    // xtfw-legacy-alias:end // End Class
 
 }
 	

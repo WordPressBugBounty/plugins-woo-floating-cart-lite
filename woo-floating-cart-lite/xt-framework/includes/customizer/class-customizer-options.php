@@ -3,17 +3,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if(!class_exists('XT_Framework_Customizer_Options')) {
+if(!class_exists('XTFW_Customizer_Options')) {
 
 	/**
 	 * Class that contains static methods to generate dynamic data options for the customizer.
 	 *
 	 * @since      1.0.0
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 */
-	class XT_Framework_Customizer_Options {
+	class XTFW_Customizer_Options {
 
 		/**
 		 * Get page array.
@@ -26,7 +26,6 @@ if(!class_exists('XT_Framework_Customizer_Options')) {
 			$pages = get_posts( array(
 				'post_type'        => 'page',
 				'posts_per_page'   => 100,
-				'suppress_filters' => true
 			) );
 
 			$pages_options = array();
@@ -61,7 +60,7 @@ if(!class_exists('XT_Framework_Customizer_Options')) {
          */
 		public static function get_image_sizes() {
 
-            $sizes = wp_get_registered_image_subsizes();
+            $sizes = xtfw_get_registered_image_subsizes();
             $sizes_options = array();
 
             foreach ( $sizes as $key => $size ) {
@@ -89,6 +88,12 @@ if(!class_exists('XT_Framework_Customizer_Options')) {
             return $sizes_options;
         }
 
-	} // End Class
+	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Customizer_Options', false ) ) {
+		class_alias( 'XTFW_Customizer_Options', 'XT_Framework_Customizer_Options' );
+	}
+	// xtfw-legacy-alias:end // End Class
 }
 

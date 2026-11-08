@@ -123,9 +123,16 @@ if ( ! function_exists( 'xtfw_implode_html_attributes' ) ) {
 		    }
 	    }
 
-	    if ( $echo ) {
-		    // Already escaped above.
-		    echo $html_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	    if ( $echo && is_array( $attributes ) ) {
+		    // Escape each attribute as it is printed.
+		    $separator = '';
+		    foreach ( $attributes as $key => $value ) {
+			    echo esc_attr( $separator ) . esc_attr( $key );
+			    if ( ! is_null( $value ) ) {
+				    echo '="' . esc_attr( $value ) . '"';
+			    }
+			    $separator = ' ';
+		    }
 	    }
 
 	    return $html_attributes;
@@ -157,11 +164,54 @@ if ( ! function_exists( 'xtfw_html_data_to_string' ) ) {
 			}
 		}
 
-		if ( $echo ) {
-			echo $html_data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( $echo && is_array( $data ) && ! empty( $data ) ) {
+			// Escape each data attribute as it is printed.
+			foreach ( $data as $key => $value ) {
+				$data_value = ! is_array( $value ) ? $value : implode( ',', $value );
+				echo ' ' . esc_attr( "data-{$key}" ) . '="' . esc_attr( $data_value ) . '"';
+			}
+			echo ' ';
 		}
 
 		return $html_data;
+	}
+}
+
+if ( ! function_exists( 'xtfw_sanitize_css_value' ) ) {
+	/**
+	 * Sanitize a single CSS property value or selector so it cannot close the rule or the style tag.
+	 *
+	 * @param string $value Raw value.
+	 *
+	 * @return string
+	 */
+	function xtfw_sanitize_css_value( $value ) {
+
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+
+		$value = wp_strip_all_tags( (string) $value );
+
+		return trim( str_replace( array( '<', '{', '}', ';' ), '', $value ) );
+	}
+}
+
+if ( ! function_exists( 'xtfw_esc_css' ) ) {
+	/**
+	 * Escape a block of generated CSS before it is added to a style tag.
+	 *
+	 * @param string $css CSS.
+	 *
+	 * @return string
+	 */
+	function xtfw_esc_css( $css ) {
+
+		if ( ! is_scalar( $css ) ) {
+			return '';
+		}
+
+		return str_replace( '<', '', wp_strip_all_tags( (string) $css ) );
 	}
 }
 

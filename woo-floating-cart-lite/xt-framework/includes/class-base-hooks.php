@@ -3,24 +3,24 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Base_Hooks' ) ) {
+if ( ! class_exists( 'XTFW_Base_Hooks' ) ) {
 
     /**
      * Class that takes care plugin base hooks, activate, deactivate and uninstall
      *
      * @since      1.0.0
-     * @package    XT_Framework
-     * @subpackage XT_Framework/includes
+     * @package    XTFW_Framework
+     * @subpackage XTFW_Framework/includes
      * @author     XplodedThemes
      */
-    class XT_Framework_Base_Hooks {
+    class XTFW_Base_Hooks {
 
         /**
          * Core class reference.
          *
          * @since    1.0.0
          * @access   private
-         * @var      XT_Framework $core Core Class
+         * @var      XTFW_Framework $core Core Class
          */
         private $core;
 
@@ -91,4 +91,10 @@ if ( ! class_exists( 'XT_Framework_Base_Hooks' ) ) {
             }
         }
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Base_Hooks', false ) ) {
+    	class_alias( 'XTFW_Base_Hooks', 'XT_Framework_Base_Hooks' );
+    }
+    // xtfw-legacy-alias:end
 }

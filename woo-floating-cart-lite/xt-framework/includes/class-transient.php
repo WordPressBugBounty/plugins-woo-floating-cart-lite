@@ -3,9 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Transient' ) ) {
+if ( ! class_exists( 'XTFW_Transient' ) ) {
 
-	class XT_Framework_Transient {
+	class XTFW_Transient {
 
         /**
          * Transient prefix
@@ -45,7 +45,9 @@ if ( ! class_exists( 'XT_Framework_Transient' ) ) {
 
             $cached = $this->get($key);
 
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only flag that skips the cache for this request.
             if($cached === false || !empty($_GET['nocache'])) {
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
                 $cached = $callback();
 
@@ -55,4 +57,10 @@ if ( ! class_exists( 'XT_Framework_Transient' ) ) {
             return $cached;
         }
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Transient', false ) ) {
+		class_alias( 'XTFW_Transient', 'XT_Framework_Transient' );
+	}
+	// xtfw-legacy-alias:end
 }

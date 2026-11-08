@@ -83,7 +83,7 @@ class Xirki_Modules_Customizer_Styling {
 		$border_on_accent_disabled = '';
 
 		if ( $back ) {
-			$back_obj       = ariColor::newColor( $back );
+			$back_obj       = Xirki_AriColor::newColor( $back );
 			$text_on_back   = ( 60 > $back_obj->lightness ) ? $back_obj->getNew( 'lightness', $back_obj->lightness + 60 )->toCSS( $back_obj->mode ) : $back_obj->getNew( 'lightness', $back_obj->lightness - 60 )->toCSS( $back_obj->mode );
 			$border_on_back = ( 80 < $back_obj->lightness ) ? $back_obj->getNew( 'lightness', $back_obj->lightness - 13 )->toCSS( $back_obj->mode ) : $back_obj->getNew( 'lightness', $back_obj->lightness + 13 )->toCSS( $back_obj->mode );
 			$back_on_back   = ( 90 < $back_obj->lightness ) ? $back_obj->getNew( 'lightness', $back_obj->lightness - 6 )->toCSS( $back_obj->mode ) : $back_obj->getNew( 'lightness', $back_obj->lightness + 11 )->toCSS( $back_obj->mode );
@@ -92,7 +92,7 @@ class Xirki_Modules_Customizer_Styling {
 		}
 		$accent = ( isset( $config['color_accent'] ) ) ? $config['color_accent'] : false;
 		if ( $accent ) {
-			$accent_obj                = ariColor::newColor( $accent );
+			$accent_obj                = Xirki_AriColor::newColor( $accent );
 			$text_on_accent            = ( 60 > $accent_obj->lightness ) ? $accent_obj->getNew( 'lightness', $accent_obj->lightness + 60 )->toCSS( $accent_obj->mode ) : $accent_obj->getNew( 'lightness', $accent_obj->lightness - 60 )->toCSS( $accent_obj->mode );
 			$border_on_accent          = ( 50 < $accent_obj->lightness ) ? $accent_obj->getNew( 'lightness', $accent_obj->lightness - 4 )->toCSS( $accent_obj->mode ) : $accent_obj->getNew( 'lightness', $accent_obj->lightness + 4 )->toCSS( $accent_obj->mode );
 			$accent_disabled_obj       = ( 35 < $accent_obj->lightness ) ? $accent_obj->getNew( 'lightness', $accent_obj->lightness - 30 ) : $accent_obj->getNew( 'lightness', $accent_obj->lightness + 30 );

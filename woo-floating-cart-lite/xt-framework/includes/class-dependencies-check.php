@@ -3,24 +3,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Dependencies_Check' ) ) {
+if ( ! class_exists( 'XTFW_Dependencies_Check' ) ) {
 
 	/**
 	 * Class that takes care plugin dependencies notices
 	 *
 	 * @since      1.0.0
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 */
-	class XT_Framework_Dependencies_Check {
+	class XTFW_Dependencies_Check {
 
 		/**
 		 * Core class reference.
 		 *
 		 * @since    1.0.0
 		 * @access   private
-		 * @var      XT_Framework $core Core Class
+		 * @var      XTFW_Framework $core Core Class
 		 */
 		private $core;
 
@@ -32,7 +32,7 @@ if ( ! class_exists( 'XT_Framework_Dependencies_Check' ) ) {
 		 *
 		 * @since    1.0.0
 		 * @access   public
-		 * @var      XT_Framework $core Core Class
+		 * @var      XTFW_Framework $core Core Class
 		 */
 		public function __construct( $core ) {
 
@@ -111,6 +111,7 @@ if ( ! class_exists( 'XT_Framework_Dependencies_Check' ) ) {
                     }
 
 					$this->core->plugin_notices()->add_warning_message( sprintf(
+						/* translators: 1: opening strong tag, 2: this plugin's name, 3: closing strong tag, 4: required plugin link. */
 						esc_html__( '%1$s%2$s%3$s plugin requires %4$s to be installed and active.', 'xt-framework' ),
 						'<strong>',
 						$this->core->plugin_name(),
@@ -147,4 +148,10 @@ if ( ! class_exists( 'XT_Framework_Dependencies_Check' ) ) {
 		}
 
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Dependencies_Check', false ) ) {
+		class_alias( 'XTFW_Dependencies_Check', 'XT_Framework_Dependencies_Check' );
+	}
+	// xtfw-legacy-alias:end
 }

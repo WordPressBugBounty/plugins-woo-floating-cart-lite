@@ -23,28 +23,28 @@ if ( ! function_exists( 'xirki_get_option' ) ) {
 
 if ( ! function_exists( 'xirki_sanitize_hex' ) ) {
 	function xirki_sanitize_hex( $color ) {
-		_deprecated_function( __FUNCTION__, '1.0.0', 'ariColor::newColor( $color )->toCSS( \'hex\' )' );
+		_deprecated_function( __FUNCTION__, '1.0.0', 'Xirki_AriColor::newColor( $color )->toCSS( \'hex\' )' );
 		return Xirki_Color::sanitize_hex( $color );
 	}
 }
 
 if ( ! function_exists( 'xirki_get_rgb' ) ) {
 	function xirki_get_rgb( $hex, $implode = false ) {
-		_deprecated_function( __FUNCTION__, '1.0.0', 'ariColor::newColor( $color )->toCSS( \'rgb\' )' );
+		_deprecated_function( __FUNCTION__, '1.0.0', 'Xirki_AriColor::newColor( $color )->toCSS( \'rgb\' )' );
 		return Xirki_Color::get_rgb( $hex, $implode );
 	}
 }
 
 if ( ! function_exists( 'xirki_get_rgba' ) ) {
 	function xirki_get_rgba( $hex = '#fff', $opacity = 100 ) {
-		_deprecated_function( __FUNCTION__, '1.0.0', 'ariColor::newColor( $color )->toCSS( \'rgba\' )' );
+		_deprecated_function( __FUNCTION__, '1.0.0', 'Xirki_AriColor::newColor( $color )->toCSS( \'rgba\' )' );
 		return Xirki_Color::get_rgba( $hex, $opacity );
 	}
 }
 
 if ( ! function_exists( 'xirki_get_brightness' ) ) {
 	function xirki_get_brightness( $hex ) {
-		_deprecated_function( __FUNCTION__, '1.0.0', 'ariColor::newColor( $color )->lightness' );
+		_deprecated_function( __FUNCTION__, '1.0.0', 'Xirki_AriColor::newColor( $color )->lightness' );
 		return Xirki_Color::get_brightness( $hex );
 	}
 }

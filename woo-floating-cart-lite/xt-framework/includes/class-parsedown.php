@@ -3,17 +3,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Parsedown' ) ) {
+if ( ! class_exists( 'XTFW_Parsedown' ) ) {
 
 	/**
 	 * Parsedown
 	 * http://parsedown.org
 	 *
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 */
-	class XT_Framework_Parsedown {
+	class XTFW_Parsedown {
 
 		const version = '1.6.0';
 
@@ -1421,4 +1421,10 @@ if ( ! class_exists( 'XT_Framework_Parsedown' ) ) {
 			'time',
 		);
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Parsedown', false ) ) {
+		class_alias( 'XTFW_Parsedown', 'XT_Framework_Parsedown' );
+	}
+	// xtfw-legacy-alias:end
 }

@@ -3,17 +3,17 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
+if ( ! class_exists( 'XTFW_Recommended_Plugins' ) ) {
 
     /**
      * Class that takes care of adding XplodedThemes plugins within wordpress popular plugins sections.
      *
-     * @package    XT_Framework
-     * @subpackage XT_Framework/includes
+     * @package    XTFW_Framework
+     * @subpackage XTFW_Framework/includes
      * @author     XplodedThemes
      */
 
-    class XT_Framework_Recommended_Plugins {
+    class XTFW_Recommended_Plugins {
 
         public static $_instance;
 
@@ -22,7 +22,7 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
          *
          * @since    1.0.0
          * @access   protected
-         * @var      XT_Framework   $core    Core Class
+         * @var      XTFW_Framework   $core    Core Class
          */
         protected $core;
 
@@ -50,7 +50,7 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
          *
          * @since    1.0.0
          * @access   public
-         * @var      XT_Framework $core Core Class
+         * @var      XTFW_Framework $core Core Class
          */
         public function __construct( $core ) {
 
@@ -65,7 +65,7 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
             add_action('network_install_plugins_'.$this->tab,  array( $this, 'browse_plugins') );
             add_filter('plugins_api_result', array( $this, 'plugin_results' ), 1, 3 );
 
-            foreach(XT_Framework::instances() as $instance) {
+            foreach(XTFW_Framework::instances() as $instance) {
                 add_action($instance->plugin_prefix('migration_complete'), array($this, 'flush_transients'), 10, 1);
             }
         }
@@ -231,7 +231,9 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
          */
         public function get_pagenum() {
 
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only pagination.
             $pagenum = isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 0;
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
             return max( 1, $pagenum );
         }
@@ -378,7 +380,8 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
 
             static $active_plugins = null;
             if ( null === $active_plugins ) {
-                $active_plugins = (array) apply_filters( 'active_plugins', get_option( 'active_plugins', array() ) );
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core's active_plugins filter.
+            $active_plugins = (array) apply_filters( 'active_plugins', get_option( 'active_plugins', array() ) );
             }
 
             foreach ( $active_plugins as $plugin ) {
@@ -508,13 +511,13 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
         }
 
         /**
-         * Main XT_Framework_Recommended_Plugins Instance
+         * Main XTFW_Recommended_Plugins Instance
          *
-         * Ensures only one instance of XT_Framework_Recommended_Plugins is loaded or can be loaded.
+         * Ensures only one instance of XTFW_Recommended_Plugins is loaded or can be loaded.
          *
-         * @var XT_Framework   $core    Core Class
+         * @var XTFW_Framework   $core    Core Class
          *
-         * @return XT_Framework_Recommended_Plugins instance
+         * @return XTFW_Recommended_Plugins instance
          * @since 1.0.0
          * @static
          */
@@ -527,4 +530,10 @@ if ( ! class_exists( 'XT_Framework_Recommended_Plugins' ) ) {
         } // End instance()
 
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Recommended_Plugins', false ) ) {
+    	class_alias( 'XTFW_Recommended_Plugins', 'XT_Framework_Recommended_Plugins' );
+    }
+    // xtfw-legacy-alias:end
 }

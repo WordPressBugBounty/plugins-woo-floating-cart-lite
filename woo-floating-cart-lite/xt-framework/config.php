@@ -64,9 +64,6 @@ if ( ! defined( 'XTFW_DIR_FREEMIUS' ) ) {
 if ( ! defined( 'XTFW_DIR_MODULES' ) ) {
     define( 'XTFW_DIR_MODULES', XTFW_DIR_INCLUDES . '/modules' );
 }
-if ( ! defined( 'XTFW_GTM_ID' ) ) {
-    define( 'XTFW_GTM_ID', 'GTM-MRT34RM' );
-}
 
 
 #endregion	

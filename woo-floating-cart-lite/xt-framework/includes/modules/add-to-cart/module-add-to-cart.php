@@ -3,9 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! class_exists( 'XT_Module_Add_To_Cart' ) ) {
+if ( ! class_exists( 'XTFW_Module_Add_To_Cart' ) ) {
 
-    class XT_Module_Add_To_Cart extends XT_Framework_Module
+    class XTFW_Module_Add_To_Cart extends XTFW_Module
     {
 
         /**
@@ -119,6 +119,7 @@ if ( ! class_exists( 'XT_Module_Add_To_Cart' ) ) {
             $singleScrollToNotice = $customizer->get_option_bool('single_added_scroll_to_notice', true);
             $singleScrollToNoticeTimeout = (!empty($xt_woofc) && $xt_woofc->customizer()->get_option_bool('flytocart_animation') ? $xt_woofc->customizer()->get_option('flytocart_animation_duration') : false);
             $redirectionEnabled = $customizer->get_option_bool('redirection_enabled', false);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce's own add-to-cart hook, called the same way WooCommerce does.
             $redirectionTo = apply_filters('woocommerce_add_to_cart_redirect', wc_get_cart_url(), null);
 
             return array(
@@ -158,14 +159,26 @@ if ( ! class_exists( 'XT_Module_Add_To_Cart' ) ) {
                 XTFW_VERSION
             );
 
+            // Footer: nothing here has to run before the page renders (WordPress still moves it to
+            // the head if a head script depends on it).
             wp_enqueue_script(
                 $this->prefix(),
                 $this->url('assets/js', 'add-to-cart'.XTFW_SCRIPT_SUFFIX . '.js'),
                 $deps,
-                XTFW_VERSION
+                XTFW_VERSION,
+                true
             );
 
             wp_localize_script($this->prefix(), 'XT_ATC', $this->get_script_vars());
+
+            // Replays WooCommerce block cart events (Store API) as the classic jQuery cart events
+            wp_enqueue_script(
+                $this->prefix('cart-bridge'),
+                $this->url('assets/js', 'cart-bridge'.XTFW_SCRIPT_SUFFIX . '.js'),
+                array($this->prefix()),
+                XTFW_VERSION,
+                true
+            );
 
             if(is_customize_preview()) {
 
@@ -282,6 +295,7 @@ if ( ! class_exists( 'XT_Module_Add_To_Cart' ) ) {
 
             $product_id = 0;
 
+            // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Same as WooCommerce's own AJAX add to cart: no nonce, so it works on cached pages, and WooCommerce's own hooks.
             if(!empty($_POST['product_id'])) {
                 $product_id = apply_filters('woocommerce_add_to_cart_product_id', absint($_POST['product_id']));
             }
@@ -289,9 +303,11 @@ if ( ! class_exists( 'XT_Module_Add_To_Cart' ) ) {
             if(empty($product_id) && !empty($_POST['add-to-cart'])) {
                 $product_id = apply_filters('woocommerce_add_to_cart_product_id', absint($_POST['add-to-cart']));
             }
+            // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
             if(!empty($product_id)) {
                 // For analytics
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce's own add-to-cart hook, called the same way WooCommerce does.
                 do_action('woocommerce_ajax_added_to_cart', $product_id);
             }
 
@@ -377,4 +393,10 @@ if ( ! class_exists( 'XT_Module_Add_To_Cart' ) ) {
             }
         }
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Module_Add_To_Cart', false ) ) {
+    	class_alias( 'XTFW_Module_Add_To_Cart', 'XT_Module_Add_To_Cart' );
+    }
+    // xtfw-legacy-alias:end
 }

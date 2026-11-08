@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Loader' ) ) {
+if ( ! class_exists( 'XTFW_Loader' ) ) {
 
 	/**
 	 * Register all actions and filters for the plugin.
@@ -12,11 +12,11 @@ if ( ! class_exists( 'XT_Framework_Loader' ) ) {
 	 * the plugin, and register them with the WordPress API. Call the
 	 * run function to execute the list of actions and filters.
 	 *
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 */
-	class XT_Framework_Loader {
+	class XTFW_Loader {
 
 		/**
 		 * The array of actions registered with WordPress.
@@ -255,4 +255,10 @@ if ( ! class_exists( 'XT_Framework_Loader' ) ) {
 			return $this->actions;
 		}
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Loader', false ) ) {
+		class_alias( 'XTFW_Loader', 'XT_Framework_Loader' );
+	}
+	// xtfw-legacy-alias:end
 }

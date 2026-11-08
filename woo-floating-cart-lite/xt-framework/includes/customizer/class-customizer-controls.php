@@ -3,9 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if(!class_exists('XT_Framework_Customizer_Controls')) {
+if(!class_exists('XTFW_Customizer_Controls')) {
 
-	class XT_Framework_Customizer_Controls {
+	class XTFW_Customizer_Controls {
 
         protected $controls;
 
@@ -35,4 +35,10 @@ if(!class_exists('XT_Framework_Customizer_Controls')) {
 			return $controls;
 		}
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Customizer_Controls', false ) ) {
+		class_alias( 'XTFW_Customizer_Controls', 'XT_Framework_Customizer_Controls' );
+	}
+	// xtfw-legacy-alias:end
 }

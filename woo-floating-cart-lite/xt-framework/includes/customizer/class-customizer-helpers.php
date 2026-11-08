@@ -3,17 +3,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if(!class_exists('XT_Framework_Customizer_Helpers')) {
+if(!class_exists('XTFW_Customizer_Helpers')) {
 
 	/**
 	 * Class that contains static helper methods.
 	 *
 	 * @since      1.0.0
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 */
-	class XT_Framework_Customizer_Helpers {
+	class XTFW_Customizer_Helpers {
 
 		public static function repeater_fields_string_to_array($data) {
 
@@ -39,6 +39,12 @@ if(!class_exists('XT_Framework_Customizer_Helpers')) {
 			return $data;
 		}
 
-	} // End Class
+	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Customizer_Helpers', false ) ) {
+		class_alias( 'XTFW_Customizer_Helpers', 'XT_Framework_Customizer_Helpers' );
+	}
+	// xtfw-legacy-alias:end // End Class
 }
 

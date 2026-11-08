@@ -79,7 +79,7 @@ final class Xirki_Modules_Webfonts_Embed {
 	 */
 	public function init() {
 		$this->populate_fonts();
-		add_action( 'xirki_dynamic_css', array( $this, 'the_css' ) );
+		add_filter( 'xirki_dynamic_css_output', array( $this, 'append_css' ) );
 	}
 
 	/**
@@ -134,12 +134,25 @@ final class Xirki_Modules_Webfonts_Embed {
 	}
 
 	/**
-	 * Webfont Loader script for Google Fonts.
+	 * Append the embedded Google Fonts CSS to the dynamic CSS.
+	 *
+	 * @access public
+	 * @param string $css The dynamic CSS so far.
+	 * @return string
+	 */
+	public function append_css( $css ) {
+		return (string) $css . $this->get_css();
+	}
+
+	/**
+	 * Get the CSS of the Google Fonts in use, with the font files served locally.
 	 *
 	 * @access public
 	 * @since 3.0.0
+	 * @return string
 	 */
-	public function the_css() {
+	public function get_css() {
+		$output = '';
 		foreach ( $this->fonts_to_load as $font ) {
 			$family  = str_replace( ' ', '+', trim( $font['family'] ) );
 			$weights = join( ',', $font['weights'] );
@@ -154,7 +167,8 @@ final class Xirki_Modules_Webfonts_Embed {
 			 * Note to code reviewers:
 			 * There's no need to check nonces or anything else, this is a simple true/false evaluation.
 			 */
-			if ( ! empty( $_GET['action'] ) && 'xirki-reset-cache' === $_GET['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only cache reset flag.
+			if ( isset( $_GET['action'] ) && is_scalar( $_GET['action'] ) && 'xirki-reset-cache' === sanitize_key( wp_unslash( $_GET['action'] ) ) ) {
 				$contents = false;
 			}
 			if ( ! $contents ) {
@@ -207,19 +221,12 @@ final class Xirki_Modules_Webfonts_Embed {
 					set_transient( $transient_id, $contents, DAY_IN_SECONDS );
 				}
 			}
-			if ( $contents ) {
-				/**
-				 * Note to code reviewers:
-				 *
-				 * Though all output should be run through an escaping function, this is pure CSS
-				 * and it is added on a call that has a PHP `header( 'Content-type: text/css' );`.
-				 * No code, script or anything else can be executed from inside a stylesheet.
-				 * For extra security we're using the wp_strip_all_tags() function here
-				 * just to make sure there's no <script> tags in there or anything else.
-				 */
-				echo wp_strip_all_tags( $contents ); // phpcs:ignore WordPress.Security.EscapeOutput
+			if ( $contents && is_string( $contents ) ) {
+				$output .= $contents;
 			}
 		}
+
+		return $output;
 	}
 
 	/**

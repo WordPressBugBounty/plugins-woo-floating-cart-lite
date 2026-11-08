@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside XTFW_Module_Add_To_Cart; these variables are local to that method.
 
 defined( 'ABSPATH' ) || exit;
 

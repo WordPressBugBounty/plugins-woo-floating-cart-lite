@@ -3,26 +3,26 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
+if ( ! class_exists( 'XTFW_System_Status' ) ) {
 
     /**
-     * XT_Framework System Status Panel
+     * XTFW_Framework System Status Panel
      *
      * Setting Page to Manage Plugins
      *
-     * @class      XT_Framework_System_Status
-     * @package    XT_Framework
+     * @class      XTFW_System_Status
+     * @package    XTFW_Framework
      * @since      1.0
      * @author     XplodedThemes
      */
-    class XT_Framework_System_Status {
+    class XTFW_System_Status {
 
         /**
          * Core class reference.
          *
          * @since    1.0.0
          * @access   private
-         * @var      XT_Framework $core
+         * @var      XTFW_Framework $core
          */
         private $core;
 
@@ -54,7 +54,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
         /**
          * Single instance of the class
          *
-         * @var \XT_Framework_System_Status
+         * @var \XTFW_System_Status
          * @since 1.0.0
          */
         protected static $_instance = null;
@@ -62,7 +62,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
         /**
          * Constructor
          *
-         * @param XT_Framework $core
+         * @param XTFW_Framework $core
          * @since  1.0.0
          * @author XplodedThemes
          */
@@ -111,15 +111,15 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
             }
 
             if($flushSystemInfo || $refresh_requested) {
-                delete_option('xt_framework_system_info');
+                delete_option('xtfw_system_info');
             }
 
-            delete_transient( 'xt_framework_system_info_templates' );
+            delete_transient( 'xtfw_system_info_templates' );
         }
 
         public function get_cached_template_overrides() {
 
-            $cache_key = 'xt_framework_system_info_templates';
+            $cache_key = 'xtfw_system_info_templates';
             $template_overrides = wp_cache_get( $cache_key );
 
             if ( false === $template_overrides ) {
@@ -136,7 +136,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
 
             $badges = array();
 
-            $system_info  = get_option( 'xt_framework_system_info' );
+            $system_info  = get_option( 'xtfw_system_info' );
 
             if(!empty($system_info['errors'])) {
                 $badges[] = array(
@@ -424,7 +424,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                     'overrides' => $overrides
                 ) : array();
 
-                set_transient('xt_framework_system_info_templates', $template_overrides, WEEK_IN_SECONDS);
+                set_transient('xtfw_system_info_templates', $template_overrides, WEEK_IN_SECONDS);
             }
 
             $active_theme_info = array(
@@ -456,22 +456,16 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
 
             $labels = $this->_requirement_labels;
 
-            $system_info        = get_option( 'xt_framework_system_info' );
+            $system_info        = get_option( 'xtfw_system_info' );
 
             $recommended_memory = 134217728;
-            $output_ip          = 'n/a';
+            $server_ip          = 'n/a';
 
-            if ( apply_filters( 'xt_framework_system_status_check_ip', false ) ) {
+            if ( isset( $_SERVER['SERVER_ADDR'] ) && is_scalar( $_SERVER['SERVER_ADDR'] ) ) {
+                $candidate_ip = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ) );
 
-                // Using 3rd party api service (https://api.ipify.org) to retrieve client IP to be displayed in system info page
-                $ip_response = wp_safe_remote_get( 'https://api.ipify.org', array( 'timeout' => 5 ) );
-
-                if ( ! is_wp_error( $ip_response ) && 200 === wp_remote_retrieve_response_code( $ip_response ) ) {
-                    $candidate_ip = trim( wp_remote_retrieve_body( $ip_response ) );
-
-                    if ( filter_var( $candidate_ip, FILTER_VALIDATE_IP ) ) {
-                        $output_ip = $candidate_ip;
-                    }
+                if ( filter_var( $candidate_ip, FILTER_VALIDATE_IP ) ) {
+                    $server_ip = $candidate_ip;
                 }
             }
 
@@ -500,10 +494,10 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                         </tr>
                         <tr>
                             <th>
-                                <?php esc_html_e( 'Output IP Address', 'xt-framework' ); ?>
+                                <?php esc_html_e( 'Server IP Address', 'xt-framework' ); ?>
                             </th>
                             <td class="requirement-value">
-                                <?php echo esc_html($output_ip); ?>
+                                <?php echo esc_html( $server_ip ); ?>
                             </td>
                         </tr>
                         <tr>
@@ -511,7 +505,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                 <?php esc_html_e( 'XT Framework Active PATH', 'xt-framework' ); ?>
                             </th>
                             <td class="requirement-value">
-                                <?php echo esc_html( '/' . basename( WP_PLUGIN_DIR ) . str_replace( WP_PLUGIN_DIR, '', $this->core->plugin_framework_path( null, null, true ) ) ); ?>
+                                <?php echo esc_html( plugin_basename( $this->core->plugin_framework_path( null, null, true ) ) ); ?>
 
                             </td>
                         </tr>
@@ -577,7 +571,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                         <strong>v.<?php echo esc_html($instance->plugin_framework_version()); ?></strong>
                                     </td>
                                     <td class="requirement-value">
-                                        <?php echo esc_html( '/' . basename( WP_PLUGIN_DIR ) . '/' . basename( $instance->plugin_path() ) ); ?>
+                                        <?php echo esc_html( plugin_basename( $instance->plugin_path() ) ); ?>
                                     </td>
                                     <td class="requirement-value">
                                         <img src="<?php echo esc_url( xtfw_dir_url( XTFW_DIR_ADMIN_TABS_ASSETS ) ); ?>/images/markets/<?php echo esc_attr( $instance->market() ); ?>.svg" class="xtfw-market-logo xtfw-market-<?php echo esc_attr( $instance->market() ) ?>"/>
@@ -626,7 +620,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                         <?php endif; ?>
                                     </th>
                                     <td class="requirement-value">
-                                        <?php echo esc_url(str_replace(WP_PLUGIN_DIR, "", $module->path())); ?>
+                                        <?php echo esc_html( plugin_basename( $module->path() ) ); ?>
                                     </td>
                                     <td class="requirement-value">
                                         <ul class="module_shared_by">
@@ -761,7 +755,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                     <th class="requirement-name" style="width: 25%;font-weight: bold;vertical-align: top;" data-export-label="Overrides">
                                         <?php echo esc_html($plugin_name); ?>
                                         <?php if(!empty($data['outdated'])): ?>
-                                            <mark class="error"><?php printf( esc_html( _n( '%s outdated template', '%s outdated templates', $data['outdated'], 'xt-framework' ) ), esc_html( number_format_i18n( $data['outdated'] ) ) ); ?> </mark>
+                                            <mark class="error"><?php /* translators: %s: number of outdated templates. */ printf( esc_html( _n( '%s outdated template', '%s outdated templates', $data['outdated'], 'xt-framework' ) ), esc_html( number_format_i18n( $data['outdated'] ) ) ); ?> </mark>
                                         <?php endif; ?>
                                         <span class="arrow-up dashicons dashicons-arrow-up-alt2"></span>
                                         <span class="arrow-down dashicons dashicons-arrow-down-alt2"></span>
@@ -859,15 +853,19 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                                 <li>
                                                     <?php
                                                     if ( $to_be_enabled ) {
-                                                        echo sprintf( esc_html__( '%s needs %s enabled', 'xt-framework' ), '<b>' . esc_html($plugin) . '</b>', '<b>' . esc_html($labels[ $key ]) . '</b>' );
+                                                        /* translators: 1: plugin name, 2: required PHP extension or setting. */
+                                                        echo sprintf( esc_html__( '%1$s needs %2$s enabled', 'xt-framework' ), '<b>' . esc_html($plugin) . '</b>', '<b>' . esc_html($labels[ $key ]) . '</b>' );
                                                     } elseif ( $key == 'wp_memory_limit' ) {
-                                                        echo sprintf( esc_html__( '%s needs at least %s of available memory', 'xt-framework' ), '<b>' . esc_html($plugin) . '</b>', '<span class="error">' . esc_html( size_format( $this->memory_size_to_num( $requirement ) ) ) . '</span>' );
+                                                        /* translators: 1: plugin name, 2: memory size. */
+                                                        echo sprintf( esc_html__( '%1$s needs at least %2$s of available memory', 'xt-framework' ), '<b>' . esc_html($plugin) . '</b>', '<span class="error">' . esc_html( size_format( $this->memory_size_to_num( $requirement ) ) ) . '</span>' );
                                                         if ( $this->memory_size_to_num( $requirement ) < $recommended_memory ) {
                                                             echo '<br/>';
+                                                            /* translators: %s: memory size. */
                                                             echo sprintf( esc_html__( 'For optimal functioning of our plugins, we suggest setting at least %s of available memory', 'xt-framework' ), '<span class="error">' . esc_html( size_format( $recommended_memory ) ) . '</span>' );
                                                         }
                                                     } else {
-                                                        echo sprintf( esc_html__( '%s needs at least %s version', 'xt-framework' ), '<b>' . esc_html($plugin) . '</b>', '<span class="error">' . esc_html($requirement) . '</span>' );
+                                                        /* translators: 1: plugin name, 2: version number. */
+                                                        echo sprintf( esc_html__( '%1$s needs at least %2$s version', 'xt-framework' ), '<b>' . esc_html($plugin) . '</b>', '<span class="error">' . esc_html($requirement) . '</span>' );
                                                     }
                                                     ?>
                                                 </li>
@@ -886,7 +884,8 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                                 }
                                                 break;
                                             case 'wp_cron_enabled':
-                                                echo sprintf( esc_html__( 'Remove %s from %s file', 'xt-framework' ), '<code>define( "DISABLE_WP_CRON", true );</code>', '<b>wp-config.php</b>' );
+                                                /* translators: 1: PHP code, 2: file name. */
+                                                echo sprintf( esc_html__( 'Remove %1$s from %2$s file', 'xt-framework' ), '<code>define( "DISABLE_WP_CRON", true );</code>', '<b>wp-config.php</b>' );
                                                 break;
                                             case 'mbstring_enabled':
                                             case 'simplexml_enabled':
@@ -897,10 +896,11 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                                                 echo esc_html__( 'Contact your hosting company in order to enable it.', 'xt-framework' );
                                                 break;
                                             case 'wp_memory_limit':
-                                                echo wp_kses_post( sprintf( __( 'Read more %s here%s or contact your hosting company in order to increase it.', 'xt-framework' ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">', '</a>' ) );
+                                                /* translators: 1: opening link tag, 2: closing link tag. */
+                                                echo wp_kses_post( sprintf( __( 'Read more %1$s here%2$s or contact your hosting company in order to increase it.', 'xt-framework' ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">', '</a>' ) );
                                                 break;
                                             default:
-                                                echo wp_kses_post( apply_filters( 'xt_framework_system_generic_message', '', $item ) );
+                                                                                    echo wp_kses_post( apply_filters( 'xtfw_system_generic_message', '', $item ) );
 
                                         } ?>
                                     <?php endif; ?>
@@ -909,14 +909,17 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
 
                                         if ( $item['value'] != 'n/a' ) {
 
+                                            /* translators: %s: memory size. */
                                             echo sprintf( esc_html__( 'For optimal functioning of our plugins, we suggest setting at least %s of available memory', 'xt-framework' ), '<span class="error">' . esc_html( size_format( $recommended_memory ) ) . '</span>' );
                                             echo '<br/>';
-                                            echo sprintf( esc_html__( 'Read more %s here%s or contact your hosting company in order to increase it.', 'xt-framework' ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">', '</a>' );
+                                            /* translators: 1: opening link tag, 2: closing link tag. */
+                                            echo sprintf( esc_html__( 'Read more %1$s here%2$s or contact your hosting company in order to increase it.', 'xt-framework' ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">', '</a>' );
 
                                         } else {
 
                                             switch ( $key ) {
                                                 case 'min_tls_version':
+                                                    /* translators: 1: opening strong tag, 2: closing strong tag. */
                                                     echo sprintf( esc_html__( 'We cannot determine which %1$sTLS%2$s version is installed.', 'xt-framework' ), '<strong>', '</strong>' );
                                                     break;
                                             }
@@ -939,7 +942,9 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                     <?php
 
                     ob_start();
+                    // phpcs:disable WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_phpinfo -- Shown only to administrators who open System Status > PHP info (capability and nonce checked).
                     phpinfo( 61 );
+                    // phpcs:enable WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_phpinfo
                     $pinfo = ob_get_contents();
                     ob_end_clean();
 
@@ -974,7 +979,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
 
             $this->_theme = $this->get_theme_info();
 
-            if ( '' == get_option( 'xt_framework_system_info' ) ) {
+            if ( '' == get_option( 'xtfw_system_info' ) ) {
 
                 $this->add_requirements( $this->core->framework_menu_name(), array(
                     'min_wp_version'  => '4.9',
@@ -1034,7 +1039,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
 
                 }
 
-                update_option( 'xt_framework_system_info', array(
+                update_option( 'xtfw_system_info', array(
                     'system_info' => $check_results,
                     'errors'      => $errors
                 ) );
@@ -1075,16 +1080,18 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
          */
         public function render_notices() {
 
-            $system_info = get_option( 'xt_framework_system_info', '' );
+            $system_info = get_option( 'xtfw_system_info', '' );
             if (!empty($system_info) && !empty($system_info['errors']) && ! $this->core->framework_is_admin_url() && ! $this->core->framework_is_admin_url( $this->slug ) ) {
-                $message = sprintf( esc_html__( '{title:}: The system check has detected some compatibility issues on your installation. %sClick here%s to know more', 'xt-framework' ), '<a href="' . esc_url( $this->core->framework_admin_url( $this->slug ) ) . '"><strong>', '</strong></a>' );
+                /* translators: 1: opening link tag, 2: closing link tag. */
+                $message = sprintf( esc_html__( '{title:}: The system check has detected some compatibility issues on your installation. %1$sClick here%2$s to know more', 'xt-framework' ), '<a href="' . esc_url( $this->core->framework_admin_url( $this->slug ) ) . '"><strong>', '</strong></a>' );
                 $this->core->framework_notices()->add_warning_message( $message );
             }
 
             $template_overrides = $this->get_cached_template_overrides();
 
             if(!empty($template_overrides) && $template_overrides['outdated'] > 0) {
-                $message =  sprintf( _n( '{title:}: The system check has detected %s%s outdated plugin template%s ', '{title:}: The system check has detected %s%s outdated plugin templates%s', $template_overrides['outdated'], 'xt-framework' ), '<a href="' . esc_url( $this->core->framework_admin_url( $this->slug ).'#template-overrides' ) . '"><strong>', number_format_i18n( $template_overrides['outdated'] ), '</strong></a>' );
+                /* translators: 1: opening link tag, 2: number of templates, 3: closing link tag. */
+                $message =  sprintf( _n( '{title:}: The system check has detected %1$s%2$s outdated plugin template%3$s ', '{title:}: The system check has detected %1$s%2$s outdated plugin templates%3$s', $template_overrides['outdated'], 'xt-framework' ), '<a href="' . esc_url( $this->core->framework_admin_url( $this->slug ).'#template-overrides' ) . '"><strong>', number_format_i18n( $template_overrides['outdated'] ), '</strong></a>' );
                 $this->core->framework_notices()->add_warning_message( $message );
             }
         }
@@ -1098,19 +1105,14 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
          */
         public function get_system_info() {
 
+            // Detect TLS 1.2+ support locally from the cURL build; no remote request is made.
             $tls = 'n/a';
 
-            if ( apply_filters( 'xt_framework_system_status_check_ssl', false ) ) {
+            if ( function_exists( 'curl_version' ) && defined( 'CURL_SSLVERSION_TLSv1_2' ) ) {
+                $curl = curl_version();
 
-                // Using 3rd party api service (https://www.howsmyssl.com/a/check) to retrieve client TLS version to be displayed in system info page
-                $tls_response = wp_safe_remote_get( 'https://www.howsmyssl.com/a/check', array( 'timeout' => 5 ) );
-
-                if ( ! is_wp_error( $tls_response ) && 200 === wp_remote_retrieve_response_code( $tls_response ) ) {
-                    $json = json_decode( wp_remote_retrieve_body( $tls_response ) );
-
-                    if ( is_object( $json ) && isset( $json->tls_version ) && is_string( $json->tls_version ) ) {
-                        $tls = sanitize_text_field( str_replace( 'TLS ', '', $json->tls_version ) );
-                    }
+                if ( is_array( $curl ) && ! empty( $curl['ssl_version'] ) ) {
+                    $tls = defined( 'CURL_SSLVERSION_TLSv1_3' ) ? '1.3' : '1.2';
                 }
             }
 
@@ -1123,7 +1125,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
                 $wp_memory_limit = max( $wp_memory_limit, $this->memory_size_to_num( @ini_get( 'memory_limit' ) ) );
             }
 
-            return apply_filters( 'xt_framework_system_additional_check', array(
+            return apply_filters( 'xtfw_system_additional_check', array(
                 'min_wp_version'    => get_bloginfo( 'version' ),
                 'min_wc_version'    => function_exists( 'WC' ) ? WC()->version : 'n/a',
                 'wp_memory_limit'   => $wp_memory_limit,
@@ -1204,7 +1206,7 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
         /**
          * Main plugin Instance
          *
-         * @return XT_Framework_System_Status
+         * @return XTFW_System_Status
          * @since  1.0.0
          * @author XplodedThemes
          */
@@ -1216,4 +1218,10 @@ if ( ! class_exists( 'XT_Framework_System_Status' ) ) {
             return self::$_instance;
         }
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_System_Status', false ) ) {
+    	class_alias( 'XTFW_System_Status', 'XT_Framework_System_Status' );
+    }
+    // xtfw-legacy-alias:end
 }

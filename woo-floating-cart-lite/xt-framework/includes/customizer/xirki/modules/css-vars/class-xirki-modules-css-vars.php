@@ -127,13 +127,15 @@ class Xirki_Modules_CSS_Vars {
 				continue;
 			}
 
-			$css .= $var . ':' . wp_strip_all_tags( (string) $val ) . ';';
+			$val = str_replace( array( '<', '{', '}', ';' ), '', wp_strip_all_tags( (string) $val ) );
+
+			$css .= $var . ':' . $val . ';';
 		}
 		$css .= '}';
 
 		wp_register_style( 'xirki-css-vars', false, array(), XIRKI_VERSION );
 		wp_enqueue_style( 'xirki-css-vars' );
-		wp_add_inline_style( 'xirki-css-vars', $css );
+		wp_add_inline_style( 'xirki-css-vars', str_replace( '<', '', wp_strip_all_tags( $css ) ) );
 	}
 
 	/**

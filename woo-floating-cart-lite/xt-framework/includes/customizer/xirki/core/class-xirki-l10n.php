@@ -59,7 +59,9 @@ class Xirki_L10n {
 		if ( null !== $this->get_path() ) {
 			load_textdomain( $this->textdomain, $this->get_path() );
 		}
+		// phpcs:disable PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Loads translations bundled with Xirki for copies installed outside WordPress.org.
 		load_plugin_textdomain( $this->textdomain, false, Xirki::$path . '/languages' );
+		// phpcs:enable PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound
 	}
 
 	/**

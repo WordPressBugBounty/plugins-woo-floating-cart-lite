@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_i18n' ) ) {
+if ( ! class_exists( 'XTFW_i18n' ) ) {
 
 	/**
 	 * Define the internationalization functionality.
@@ -12,11 +12,11 @@ if ( ! class_exists( 'XT_Framework_i18n' ) ) {
 	 * so that it is ready for translation.
 	 *
 	 * @since      1.0.0
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 */
-	class XT_Framework_i18n {
+	class XTFW_i18n {
 
 		private $textdomain;
 		private $file;
@@ -40,11 +40,19 @@ if ( ! class_exists( 'XT_Framework_i18n' ) ) {
 		 */
 		public function load_plugin_textdomain() {
 
+			// phpcs:disable PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Loads translations bundled with the plugin for copies installed outside WordPress.org.
 			load_plugin_textdomain(
 				$this->textdomain,
 				false,
 				basename( dirname( $this->file ) ) . '/languages/'
 			);
+			// phpcs:enable PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound
 		}
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_i18n', false ) ) {
+		class_alias( 'XTFW_i18n', 'XT_Framework_i18n' );
+	}
+	// xtfw-legacy-alias:end
 }

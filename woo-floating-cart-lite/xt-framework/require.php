@@ -13,6 +13,11 @@ require_once XTFW_DIR_INCLUDES . '/functions-helpers.php';
 require_once XTFW_DIR_INCLUDES . '/functions-metabox.php';
 
 require_once XTFW_DIR_INCLUDES . '/class-framework.php';
+
+// Freemius checkout purchase tracking. WordPress.org packages don't include this file.
+if ( file_exists( XTFW_DIR_INCLUDES . '/class-checkout-tracking.php' ) ) {
+	require_once XTFW_DIR_INCLUDES . '/class-checkout-tracking.php';
+}
 require_once XTFW_DIR_INCLUDES . '/class-cache.php';
 require_once XTFW_DIR_INCLUDES . '/class-transient.php';
 require_once XTFW_DIR_INCLUDES . '/class-plugin.php';

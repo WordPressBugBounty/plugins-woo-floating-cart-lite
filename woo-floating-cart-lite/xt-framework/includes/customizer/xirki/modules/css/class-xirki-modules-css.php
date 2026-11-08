@@ -97,17 +97,7 @@ class Xirki_Modules_CSS {
 		// Admin styles, adds compatibility with the new WordPress editor (Gutenberg).
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_styles' ), 100 );
 
-		add_action( 'wp', array( $this, 'print_styles_action' ) );
-
-		if ( ! apply_filters( 'xirki_output_inline_styles', true ) ) {
-			$priority = 999;
-			if ( isset( $config['styles_priority'] ) ) {
-				$priority = absint( $config['styles_priority'] );
-			}
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), $priority );
-		} else {
-			add_action( 'wp_enqueue_scripts', array( $this, 'print_styles_inline' ), 999 );
-		}
+		add_action( 'wp_enqueue_scripts', array( $this, 'print_styles_inline' ), 999 );
 	}
 
 	/**
@@ -118,73 +108,45 @@ class Xirki_Modules_CSS {
 	 * @return void
 	 */
 	public function print_styles_inline() {
-		ob_start();
-		$this->print_styles();
-		$css = trim( ob_get_clean() );
+		$css = trim( $this->get_styles() );
 
 		if ( ! empty( $css ) ) {
 			wp_register_style( 'xirki-inline-styles', false, array(), XIRKI_VERSION );
 			wp_enqueue_style( 'xirki-inline-styles' );
-			wp_add_inline_style( 'xirki-inline-styles', $css );
+			wp_add_inline_style( 'xirki-inline-styles', self::esc_css( $css ) );
 		}
 	}
 
 	/**
-	 * Enqueue the styles.
+	 * Add the styles to the block editor.
 	 *
 	 * @access public
 	 * @since 3.0.36
 	 * @return void
 	 */
 	public function enqueue_styles() {
-
-		$args = array(
-			'action' => apply_filters( 'xirki_styles_action_handle', 'xirki-styles' ),
-		);
-		if ( is_admin() && ! is_customize_preview() ) {
-			$args['editor'] = '1';
-		}
-
-		// Enqueue the dynamic stylesheet.
-		wp_enqueue_style(
-            'xirki-dynamic-styles',
-			add_query_arg( $args, site_url() ),
-			array(),
-			XIRKI_VERSION
-		);
+		$this->print_styles_inline();
 	}
 
 	/**
-	 * Prints the styles as an enqueued file.
+	 * Kept for backwards compatibility: styles are always added inline now.
 	 *
 	 * @access public
-	 * @since 3.0.36
 	 * @return void
 	 */
-	public function print_styles_action() {
-		/**
-		 * Note to code reviewers:
-		 * There is no need for a nonce check here, we're only checking if this is a valid request or not.
-		 */
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only stylesheet endpoint.
-		$requested_action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
-
-		if ( empty( $requested_action ) || apply_filters( 'xirki_styles_action_handle', 'xirki-styles' ) !== $requested_action ) { // phpcs:ignore WordPress.Security.NonceVerification
-			return;
-		}
-
-		// This is a stylesheet.
-		header( 'Content-type: text/css' );
-		$this->print_styles();
-		exit;
+	public function print_styles() {
+		$this->print_styles_inline();
 	}
 
 	/**
-	 * Prints the styles.
+	 * Get the generated styles of every config, plus the CSS other modules add (such as embedded webfonts).
 	 *
 	 * @access public
+	 * @return string
 	 */
-	public function print_styles() {
+	public function get_styles() {
+
+		$css = '';
 
 		// Go through all configs.
 		$configs = Xirki::$config;
@@ -194,24 +156,34 @@ class Xirki_Modules_CSS {
 			}
 			$styles = self::loop_controls( $config_id );
 			$styles = apply_filters( "xirki_{$config_id}_dynamic_css", $styles );
-			if ( ! empty( $styles ) ) {
-				/**
-				 * Note to code reviewers:
-				 *
-				 * Though all output should be run through an escaping function, this is pure CSS.
-				 *
-				 * When used in the print_styles_action() method the PHP header() call makes the browser interpret it as such.
-				 * No code, script or anything else can be executed from inside a stylesheet.
-				 *
-				 * When using in the print_styles_inline() method the wp_strip_all_tags call we use below
-				 * strips anything that has the possibility to be malicious, and since this is inslide a <style> tag
-				 * it can only be interpreted by the browser as such.
-				 * wp_strip_all_tags() excludes the possibility of someone closing the <style> tag and then opening something else.
-				 */
-				echo wp_strip_all_tags( $styles ); // phpcs:ignore WordPress.Security.EscapeOutput
+			if ( ! empty( $styles ) && is_string( $styles ) ) {
+				$css .= $styles;
 			}
 		}
-		do_action( 'xirki_dynamic_css' );
+
+		/**
+		 * Filters extra dynamic CSS appended after the generated styles (used by the webfonts module).
+		 *
+		 * @param string $css Extra CSS.
+		 */
+		$extra = apply_filters( 'xirki_dynamic_css_output', '' );
+		if ( ! empty( $extra ) && is_string( $extra ) ) {
+			$css .= $extra;
+		}
+
+		return $css;
+	}
+
+	/**
+	 * Escape a block of CSS so it can't close the style tag it is printed in.
+	 *
+	 * @static
+	 * @access public
+	 * @param string $css The CSS.
+	 * @return string
+	 */
+	public static function esc_css( $css ) {
+		return str_replace( '<', '', wp_strip_all_tags( (string) $css ) );
 	}
 
 	/**

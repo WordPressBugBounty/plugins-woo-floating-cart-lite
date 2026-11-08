@@ -4,11 +4,22 @@
 *
 * @author      XplodedThemss
 * @category    Core
-* @package     XT_Framework/Admin/Functions
+* @package     XTFW_Framework/Admin/Functions
 * @version     1.0.0
 */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
+}
+
+/**
+ * Output custom HTML attributes, each escaped and preceded by a space.
+ *
+ * @param array $attributes Attribute name => value pairs.
+ */
+function xtfw_echo_custom_attributes( $attributes ) {
+	foreach ( (array) $attributes as $attribute => $value ) {
+		echo ' ' . esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
+	}
 }
 
 /**
@@ -19,6 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function xtfw_wp_text_input( $field ) {
 	global $thepostid, $post;
 
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $thepostid is WooCommerce's own global, used the same way as woocommerce_wp_text_input().
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
@@ -46,7 +58,7 @@ function xtfw_wp_text_input( $field ) {
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 		foreach ( $field['custom_attributes'] as $attribute => $value ) {
-			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
+			$custom_attributes[ $attribute ] = $value;
 		}
 	}
 
@@ -57,7 +69,9 @@ function xtfw_wp_text_input( $field ) {
 		xtfw_help_tip( $field['description'] );
 	}
 
-	echo '<input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" ' . implode( ' ', $custom_attributes ) . ' /> ';
+	echo '<input type="' . esc_attr( $field['type'] ) . '" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '"';
+	xtfw_echo_custom_attributes( $custom_attributes );
+	echo ' /> ';
 
 	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
 		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
@@ -74,6 +88,7 @@ function xtfw_wp_text_input( $field ) {
 function xtfw_wp_hidden_input( $field ) {
 	global $thepostid, $post;
 
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $thepostid is WooCommerce's own global, used the same way as woocommerce_wp_text_input().
 	$thepostid      = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
@@ -89,6 +104,7 @@ function xtfw_wp_hidden_input( $field ) {
 function xtfw_wp_textarea_input( $field ) {
 	global $thepostid, $post;
 
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $thepostid is WooCommerce's own global, used the same way as woocommerce_wp_text_input().
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
@@ -106,7 +122,7 @@ function xtfw_wp_textarea_input( $field ) {
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 		foreach ( $field['custom_attributes'] as $attribute => $value ) {
-			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
+			$custom_attributes[ $attribute ] = $value;
 		}
 	}
 
@@ -117,7 +133,9 @@ function xtfw_wp_textarea_input( $field ) {
 		xtfw_help_tip( $field['description'] );
 	}
 
-	echo '<textarea class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '"  name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="' . esc_attr( $field['rows'] ) . '" cols="' . esc_attr( $field['cols'] ) . '" ' . implode( ' ', $custom_attributes ) . '>' . esc_textarea( $field['value'] ) . '</textarea> ';
+	echo '<textarea class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '"  name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" placeholder="' . esc_attr( $field['placeholder'] ) . '" rows="' . esc_attr( $field['rows'] ) . '" cols="' . esc_attr( $field['cols'] ) . '"';
+	xtfw_echo_custom_attributes( $custom_attributes );
+	echo '>' . esc_textarea( $field['value'] ) . '</textarea> ';
 
 	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
 		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
@@ -134,6 +152,7 @@ function xtfw_wp_textarea_input( $field ) {
 function xtfw_wp_checkbox( $field ) {
 	global $thepostid, $post;
 
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $thepostid is WooCommerce's own global, used the same way as woocommerce_wp_text_input().
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
@@ -149,7 +168,7 @@ function xtfw_wp_checkbox( $field ) {
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 		foreach ( $field['custom_attributes'] as $attribute => $value ) {
-			$custom_attributes[] = esc_attr( $attribute ) . '="' . esc_attr( $value ) . '"';
+			$custom_attributes[ $attribute ] = $value;
 		}
 	}
 
@@ -160,7 +179,9 @@ function xtfw_wp_checkbox( $field ) {
 		xtfw_help_tip( $field['description'] );
 	}
 
-	echo '<input type="checkbox" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false ) . '  ' . implode( ' ', $custom_attributes ) . '/> ';
+	echo '<input type="checkbox" class="' . esc_attr( $field['class'] ) . '" style="' . esc_attr( $field['style'] ) . '" name="' . esc_attr( $field['name'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['cbvalue'] ) . '" ' . checked( $field['value'], $field['cbvalue'], false );
+	xtfw_echo_custom_attributes( $custom_attributes );
+	echo '/> ';
 
 	if ( ! empty( $field['description'] ) && false === $field['desc_tip'] ) {
 		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
@@ -177,6 +198,7 @@ function xtfw_wp_checkbox( $field ) {
 function xtfw_wp_select( $field ) {
 	global $thepostid, $post;
 
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $thepostid is WooCommerce's own global, used the same way as woocommerce_wp_text_input().
 	$thepostid = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field     = wp_parse_args(
 		$field, array(
@@ -207,15 +229,16 @@ function xtfw_wp_select( $field ) {
 	$tooltip     = ! empty( $field['description'] ) && false !== $field['desc_tip'] ? $field['description'] : '';
 	$description = ! empty( $field['description'] ) && false === $field['desc_tip'] ? $field['description'] : '';
 	?>
-	<p <?php echo xtfw_implode_html_attributes( $wrapper_attributes ); // WPCS: XSS ok. ?>>
-		<label <?php echo xtfw_implode_html_attributes( $label_attributes ); // WPCS: XSS ok. ?>><?php echo wp_kses_post( $field['label'] ); ?></label>
+	<p <?php echo xtfw_implode_html_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- xtfw_implode_html_attributes() escapes every attribute. ?>>
+		<label <?php echo xtfw_implode_html_attributes( $label_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- xtfw_implode_html_attributes() escapes every attribute. ?>><?php echo wp_kses_post( $field['label'] ); ?></label>
 		<?php if ( $tooltip ) : ?>
 			<?php xtfw_help_tip( $tooltip ); // WPCS: XSS ok. ?>
 		<?php endif; ?>
-		<select <?php echo xtfw_implode_html_attributes( $field_attributes ); // WPCS: XSS ok. ?>>
+		<select <?php echo xtfw_implode_html_attributes( $field_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- xtfw_implode_html_attributes() escapes every attribute. ?>>
 			<?php
 			foreach ( $field['options'] as $key => $value ) {
-				echo '<option value="' . esc_attr( $key ) . '"' . xtfw_selected( $key, $field['value'] ) . '>' . esc_html( $value ) . '</option>';
+				$is_selected = is_array( $field['value'] ) ? in_array( (string) $key, array_map( 'strval', $field['value'] ), true ) : (string) $key === (string) $field['value'];
+				echo '<option value="' . esc_attr( $key ) . '"' . selected( $is_selected, true, false ) . '>' . esc_html( $value ) . '</option>';
 			}
 			?>
 		</select>
@@ -303,6 +326,7 @@ function xtfw_wp_select2( $field = array() ) {
 function xtfw_wp_radio( $field ) {
 	global $thepostid, $post;
 
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $thepostid is WooCommerce's own global, used the same way as woocommerce_wp_text_input().
 	$thepostid              = empty( $thepostid ) ? $post->ID : $thepostid;
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';

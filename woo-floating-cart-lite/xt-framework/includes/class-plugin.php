@@ -3,9 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Plugin' ) ) {
+if ( ! class_exists( 'XTFW_Plugin' ) ) {
 
-	class XT_Framework_Plugin {
+	class XTFW_Plugin {
 
 		public $version;
 		public $name;
@@ -21,6 +21,7 @@ if ( ! class_exists( 'XT_Framework_Plugin' ) ) {
 		public $dependencies = array();
 		public $conflicts = array();
         public $wc_hpos = true;
+        public $wc_cart_checkout_blocks = null;
 		public $top_menu = false;
         public $premium_only = false;
         public $trial_days = 14;
@@ -102,6 +103,16 @@ if ( ! class_exists( 'XT_Framework_Plugin' ) ) {
             return $this->wc_hpos;
         }
 
+        /**
+         * Cart and Checkout blocks compatibility: true or false when the plugin declares it, null
+         * (nothing declared) by default.
+         *
+         * @since 2.6.0
+         */
+        public function wc_cart_checkout_blocks() {
+            return $this->wc_cart_checkout_blocks;
+        }
+
 		public function top_menu() {
 			return $this->top_menu;
 		}
@@ -126,4 +137,10 @@ if ( ! class_exists( 'XT_Framework_Plugin' ) ) {
 			}
 		}
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Plugin', false ) ) {
+		class_alias( 'XTFW_Plugin', 'XT_Framework_Plugin' );
+	}
+	// xtfw-legacy-alias:end
 }

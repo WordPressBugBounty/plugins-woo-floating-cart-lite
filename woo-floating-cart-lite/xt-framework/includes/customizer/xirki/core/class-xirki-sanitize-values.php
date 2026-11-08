@@ -158,7 +158,7 @@ class Xirki_Sanitize_Values {
 	 * @return string
 	 */
 	public static function rgba( $value ) {
-		$color = ariColor::newColor( $value );
+		$color = Xirki_AriColor::newColor( $value );
 		return $color->toCSS( 'rgba' );
 	}
 
@@ -183,7 +183,7 @@ class Xirki_Sanitize_Values {
 		}
 
 		// Instantiate the object.
-		$color = ariColor::newColor( $value );
+		$color = Xirki_AriColor::newColor( $value );
 
 		// Return a CSS value, using the auto-detected mode.
 		return $color->toCSS( $color->mode );

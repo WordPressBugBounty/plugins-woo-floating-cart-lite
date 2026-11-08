@@ -3,24 +3,24 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Modules' ) ) {
+if ( ! class_exists( 'XTFW_Modules' ) ) {
 
     /**
      * Class that takes care of rendering common message blocks
      *
      * @since      1.0.0
-     * @package    XT_Framework
-     * @subpackage XT_Framework/includes
+     * @package    XTFW_Framework
+     * @subpackage XTFW_Framework/includes
      * @author     XplodedThemes
      */
-    class XT_Framework_Modules {
+    class XTFW_Modules {
 
         /**
          * Core class reference.
          *
          * @since    1.0.0
          * @access   private
-         * @var      XT_Framework    core    Core Class
+         * @var      XTFW_Framework    core    Core Class
          */
         protected $core;
 
@@ -29,7 +29,7 @@ if ( ! class_exists( 'XT_Framework_Modules' ) ) {
          *
          * @since    1.0.0
          * @access   protected
-         * @var $modules XT_Framework_Module[]
+         * @var $modules XTFW_Module[]
          */
         protected $modules = array();
 
@@ -37,6 +37,7 @@ if ( ! class_exists( 'XT_Framework_Modules' ) ) {
 
             $this->core = $core;
 
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             $this->modules = apply_filters( $this->core->plugin_prefix( 'modules' ), $this->modules );
             $this->modules = array_unique($this->modules);
 
@@ -57,7 +58,7 @@ if ( ! class_exists( 'XT_Framework_Modules' ) ) {
                 $module_path = XTFW_DIR_MODULES.'/'.$module.'/module-'.$module.'.php';
                 $module = xtfw_dash_to_camel_case($module, true, true);
                 $module_name = str_replace("_", " ", $module);
-                $module_class = 'XT_Module_'.$module;
+                $module_class = 'XTFW_Module_'.$module;
 
                 if(file_exists($module_path)) {
 
@@ -76,7 +77,7 @@ if ( ! class_exists( 'XT_Framework_Modules' ) ) {
 	     * @since    1.0.0
 	     * @access   public
 	     *
-	     * @return   XT_Framework_Module[] $modules
+	     * @return   XTFW_Module[] $modules
 	     */
         public function all($nofilter = false) {
 
@@ -95,7 +96,7 @@ if ( ! class_exists( 'XT_Framework_Modules' ) ) {
 	     * @since    1.0.0
 	     * @access   public
 	     *
-	     * @return   XT_Framework_Module $module|null
+	     * @return   XTFW_Module $module|null
 	     */
 	    public function get($id) {
 
@@ -135,4 +136,10 @@ if ( ! class_exists( 'XT_Framework_Modules' ) ) {
             return $ids;
         }
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Modules', false ) ) {
+    	class_alias( 'XTFW_Modules', 'XT_Framework_Modules' );
+    }
+    // xtfw-legacy-alias:end
 }

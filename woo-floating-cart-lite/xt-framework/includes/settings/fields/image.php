@@ -1,10 +1,11 @@
 <?php
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside an XTFW_Settings method; these variables are local to it.
 /**
  * Template for displaying the image field
  *
  * @var array $field The field.
  *
- * @package XT_Framework_Settings\Fields
+ * @package XTFW_Settings\Fields
  */
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.

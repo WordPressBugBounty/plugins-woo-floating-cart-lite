@@ -185,7 +185,7 @@ class Xirki_Field_Typography extends Xirki_Field {
 					}
 					break;
 				case 'color':
-					$value['color'] = '' === $value['color'] ? '' : ariColor::newColor( $val )->toCSS( 'hex' );
+					$value['color'] = '' === $value['color'] ? '' : Xirki_AriColor::newColor( $val )->toCSS( 'hex' );
 					break;
 			}
 		}

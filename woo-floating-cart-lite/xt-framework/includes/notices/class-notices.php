@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Notices' ) ) {
+if ( ! class_exists( 'XTFW_Notices' ) ) {
 
 	/**
 	 * WordPress Backend & Frontend Message Handler Class
@@ -15,13 +15,13 @@ if ( ! class_exists( 'XT_Framework_Notices' ) ) {
 	 * resorting to passing the messages as query vars
 	 *
 	 * @since      1.0.0
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 *
 	 * @version 1.0.0
 	 */
-	class XT_Framework_Notices {
+	class XTFW_Notices {
 
 		/** transient message prefix */
 		const MESSAGE_TRANSIENT_PREFIX = '_xtfw_notice_';
@@ -121,7 +121,9 @@ if ( ! class_exists( 'XT_Framework_Notices' ) ) {
 		 */
 		public function load_messages() {
 
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only: shows a one-time message after a redirect.
 			if ( isset( $_GET[ self::MESSAGE_ID_GET_NAME ] ) && $this->get_message_id() == $_GET[ self::MESSAGE_ID_GET_NAME ] ) {
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 				
 				$message_id_get_name = filter_input(INPUT_GET, self::MESSAGE_ID_GET_NAME );
 
@@ -629,4 +631,10 @@ if ( ! class_exists( 'XT_Framework_Notices' ) ) {
 		}
 
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Notices', false ) ) {
+		class_alias( 'XTFW_Notices', 'XT_Framework_Notices' );
+	}
+	// xtfw-legacy-alias:end
 }

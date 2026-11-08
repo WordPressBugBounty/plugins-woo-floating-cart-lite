@@ -4,7 +4,7 @@
 *
 * @author      XplodedThemss
 * @category    Core
-* @package     XT_Framework/Admin/Functions
+* @package     XTFW_Framework/Admin/Functions
 * @version     1.0.0
 */
 if ( ! defined( 'ABSPATH' ) ) {

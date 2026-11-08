@@ -3,17 +3,17 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
-if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
+if ( !class_exists( 'XTFW_Plugin_Tabs' ) ) {
     /**
      * The admin-specific functionality of the plugin.
      *
      * Defines the plugin name, version, and two examples hooks for how to
      * enqueue the admin-specific stylesheet and JavaScript.
      *
-     * @package    XT_Framework_Plugin_Tabs
+     * @package    XTFW_Plugin_Tabs
      * @author     XplodedThemes
      */
-    class XT_Framework_Plugin_Tabs extends XT_Framework_Admin_Tabs {
+    class XTFW_Plugin_Tabs extends XTFW_Admin_Tabs {
         public $logo = '';
 
         public $description = '';
@@ -29,11 +29,13 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
             }
             if ( $this->core->access_manager() && $this->is_admin_tabs_page() && $this->core->is_freemius() ) {
                 if ( $this->core->access_manager()->is_activation_mode() && !$this->core->access_manager()->is_activation_page() ) {
-                    wp_redirect( $this->get_tab_url() );
+                    wp_safe_redirect( $this->get_tab_url() );
                     exit;
                 } else {
                     if ( !$this->core->access_manager()->is_registered() && $this->is_network_active && is_network_admin() && !$this->core->access_manager()->is_activation_mode() ) {
+                        // phpcs:disable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Network admin can be on the main site's domain in multisite, which wp_safe_redirect() would block.
                         wp_redirect( network_admin_url() );
+                        // phpcs:enable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
                         exit;
                     }
                     $this->core->access_manager()->add_filter( 'templates/account.php', array($this, 'wrap_freemius_admin_page'), 10 );
@@ -47,7 +49,10 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
         }
 
         public function is_admin_tabs_page() {
-            return !empty( $_GET['page'] ) && strpos( $_GET['page'], $this->core->plugin_slug() ) !== false;
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin routing.
+            $current_page = ( isset( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '' );
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
+            return !empty( $current_page ) && strpos( $current_page, $this->core->plugin_slug() ) !== false;
         }
 
         public function wrap_freemius_admin_page( $template ) {
@@ -56,7 +61,7 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
                 echo '<p>&nbsp;</p>';
             }
             $this->tabs_admin_page( $template );
-            return ob_get_clean();
+            return $this->insert_sdk_template( ob_get_clean(), $template );
         }
 
         public function wrap_freemius_minimal_admin_page( $template ) {
@@ -69,13 +74,36 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
                 $hide_title = true;
             }
             $this->tabs_admin_page( $template, true, $hide_title );
-            return ob_get_clean();
+            return $this->insert_sdk_template( ob_get_clean(), $template );
+        }
+
+        /**
+         * Put the Freemius SDK template inside the rendered tabs wrapper.
+         *
+         * The result goes back to the SDK through its template filter; the SDK prints it.
+         *
+         * @param string $wrapper  Tabs wrapper markup containing the placeholder.
+         * @param string $template SDK template markup.
+         *
+         * @return string
+         */
+        protected function insert_sdk_template( $wrapper, $template ) {
+            if ( false === strpos( $wrapper, self::SDK_CONTENT_PLACEHOLDER ) ) {
+                return $wrapper . $template;
+            }
+            return str_replace( self::SDK_CONTENT_PLACEHOLDER, $template, $wrapper );
         }
 
         protected function apply_filters() {
+            // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             $this->tabs = apply_filters( $this->core->plugin_prefix( 'admin_tabs' ), $this->tabs, $this );
+            // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
+            // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             $this->logo = apply_filters( $this->core->plugin_prefix( 'admin_tabs_logo' ), $this->logo, $this );
+            // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
+            // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             $this->description = apply_filters( $this->core->plugin_prefix( 'admin_tabs_description' ), $this->description, $this );
+            // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
             if ( $this->core->is_freemius() && $this->is_network_active && is_network_admin() ) {
                 if ( $this->core->access_manager()->is_registered() ) {
                     $this->tabs = array_filter( $this->tabs, function ( $tab ) {
@@ -95,16 +123,19 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
             if ( !$this->is_admin_tabs_page() ) {
                 return;
             }
-            if ( !empty( $_GET['page'] ) && $_GET['page'] !== $this->core->plugin_slug() ) {
-                $page = sanitize_text_field( $_GET['page'] );
-                $tab_id = str_replace( $this->core->plugin_slug() . '-', '', $page );
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin routing.
+            $current_page = ( isset( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '' );
+            $current_tab = ( isset( $_GET['tab'] ) && is_scalar( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '' );
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
+            if ( !empty( $current_page ) && $current_page !== $this->core->plugin_slug() ) {
+                $tab_id = str_replace( $this->core->plugin_slug() . '-', '', $current_page );
                 if ( $this->tab_exists( $tab_id ) ) {
                     $this->active_tab = $tab_id;
                 }
             }
-            if ( !empty( $_GET['page'] ) && $_GET['page'] === $this->core->plugin_slug() ) {
-                if ( !empty( $_GET['tab'] ) ) {
-                    $tab_id = sanitize_text_field( $_GET['tab'] );
+            if ( !empty( $current_page ) && $current_page === $this->core->plugin_slug() ) {
+                if ( !empty( $current_tab ) ) {
+                    $tab_id = $current_tab;
                     if ( $this->tab_exists( $tab_id ) ) {
                         $this->active_tab = $tab_id;
                     }
@@ -264,12 +295,14 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
                             $this->capability,
                             $module->id(),
                             function () use($module) {
-                                wp_redirect( $module->admin_url() );
+                                wp_safe_redirect( $module->admin_url() );
                                 exit;
                             },
                             0
                         );
+                        // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
                         do_action( $module->prefix( 'menu_loaded' ) );
+                        // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
                     }
                 }
                 if ( $this->core->is_freemius() && $this->core->access_manager()->is_activation_mode() && $this->is_network_active && !is_network_admin() ) {
@@ -280,7 +313,9 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
                         $this->capability,
                         $this->core->plugin_slug(),
                         function () {
+                            // phpcs:disable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Can be the network admin, which is on the main site's domain in multisite.
                             wp_redirect( $this->get_tab_url( '', null, $this->is_network_active ) );
+                            // phpcs:enable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
                             exit;
                         },
                         0
@@ -300,7 +335,9 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
             foreach ( $this->tabs as $tab ) {
                 $id = $tab['id'];
                 $title = ( !empty( $tab['menu_title'] ) ? $tab['menu_title'] : (( !empty( $tab['title'] ) ? $tab['title'] : '' )) );
+                // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
                 $title = apply_filters( $this->core->plugin_prefix( 'admin_tabs_tab_title' ), $title, $tab );
+                // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
                 if ( !empty( $tab['badges'] ) ) {
                     $title .= $this->get_badges_html( $tab['badges'] );
                 }
@@ -329,7 +366,9 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
                             if ( !$redirect ) {
                                 $this->tabs_admin_page();
                             } else {
+                                // phpcs:disable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Opens the tab's link, which can be the network admin or an external page.
                                 wp_redirect( $redirect );
+                                // phpcs:enable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
                                 exit;
                             }
                         },
@@ -378,7 +417,9 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
                         $this->capability,
                         $this->core->plugin_slug(),
                         function () {
+                            // phpcs:disable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Can be the network admin, which is on the main site's domain in multisite.
                             wp_redirect( $this->core->access_manager()->get_account_url() );
+                            // phpcs:enable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
                             exit;
                         },
                         0
@@ -506,7 +547,9 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
 
         public function show_tab( $page_content = null ) {
             $tab = parent::show_tab( $page_content );
+            // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action( $this->core->plugin_prefix( 'admin_tabs_show_tab' ), $tab, $this );
+            // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
             return $tab;
         }
 
@@ -525,4 +568,9 @@ if ( !class_exists( 'XT_Framework_Plugin_Tabs' ) ) {
 
     }
 
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( !class_exists( 'XT_Framework_Plugin_Tabs', false ) ) {
+        class_alias( 'XTFW_Plugin_Tabs', 'XT_Framework_Plugin_Tabs' );
+    }
+    // xtfw-legacy-alias:end
 }

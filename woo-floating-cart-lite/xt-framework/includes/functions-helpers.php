@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function xtfw_maybe_define_constant( $name, $value ) {
     if ( ! defined( $name ) ) {
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- Defines core or framework constants by name (e.g. DOING_AJAX) only when missing.
         define( $name, $value );
     }
 }
@@ -89,7 +90,7 @@ function xtfw_changelog_html($readme_file) {
 
 	require_once XTFW_DIR_INCLUDES . '/class-parsedown.php';
 
-	$parsedown = new XT_Framework_Parsedown();
+	$parsedown = new XTFW_Parsedown();
 
 	$changelog = '';
 
@@ -162,7 +163,7 @@ function xtfw_is_rest_request() {
     }
 
     $rest_prefix         = trailingslashit( rest_get_url_prefix() );
-    $is_rest_request = strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) !== false;
+    $is_rest_request = strpos( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), $rest_prefix ) !== false;
 
     return apply_filters( 'xtfw_is_rest_request', $is_rest_request );
 }

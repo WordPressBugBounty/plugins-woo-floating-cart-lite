@@ -3,23 +3,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Migration' ) ) {
+if ( ! class_exists( 'XTFW_Migration' ) ) {
 
 	/**
 	 * Class that takes care of migrations.
 	 *
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 */
-	class XT_Framework_Migration {
+	class XTFW_Migration {
 
 		/**
 		 * Core class reference.
 		 *
 		 * @since    1.0.0
 		 * @access   private
-		 * @var      XT_Framework    core    Core Class
+		 * @var      XTFW_Framework    core    Core Class
 		 */
 		private $core;
 
@@ -122,6 +122,7 @@ if ( ! class_exists( 'XT_Framework_Migration' ) ) {
 
             $this->set_changelog_viewed(false);
 
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
 			do_action( $this->core->plugin_prefix( 'migration_complete' ), $this->core );
 		}
 
@@ -137,4 +138,10 @@ if ( ! class_exists( 'XT_Framework_Migration' ) ) {
         }
 
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Migration', false ) ) {
+		class_alias( 'XTFW_Migration', 'XT_Framework_Migration' );
+	}
+	// xtfw-legacy-alias:end
 }

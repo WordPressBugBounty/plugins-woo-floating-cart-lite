@@ -3,9 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Cache' ) ) {
+if ( ! class_exists( 'XTFW_Cache' ) ) {
 
-	class XT_Framework_Cache {
+	class XTFW_Cache {
 
         /**
          * Cache group
@@ -50,7 +50,9 @@ if ( ! class_exists( 'XT_Framework_Cache' ) ) {
 
             $cached = $this->get($key);
 
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only flag that skips the cache for this request.
             if($cached === false || !empty($_GET['nocache'])) {
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
                 $cached = $callback();
 
@@ -60,4 +62,10 @@ if ( ! class_exists( 'XT_Framework_Cache' ) ) {
             return $cached;
         }
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Cache', false ) ) {
+		class_alias( 'XTFW_Cache', 'XT_Framework_Cache' );
+	}
+	// xtfw-legacy-alias:end
 }

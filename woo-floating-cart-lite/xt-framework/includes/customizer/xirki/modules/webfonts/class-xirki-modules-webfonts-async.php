@@ -137,7 +137,7 @@ final class Xirki_Modules_Webfonts_Async {
 		if ( ! empty( $this->fonts_to_load ) ) {
 			wp_add_inline_script(
 				'webfont-loader',
-				'WebFont.load({google:{families:[\'' . join( '\', \'', $this->fonts_to_load ) . '\']}});',
+				'WebFont.load({google:{families:' . wp_json_encode( array_values( array_map( 'strval', $this->fonts_to_load ) ) ) . '}});',
 				'after'
 			);
 		}

@@ -9,8 +9,8 @@ if ( !defined( 'ABSPATH' ) ) {
  * This class will be extended by XT Plugins and handles all common things between plugins
  *
  * @since      1.0.0
- * @package    XT_Framework
- * @subpackage XT_Framework/includes
+ * @package    XTFW_Framework
+ * @subpackage XTFW_Framework/includes
  * @author     XplodedThemes
  *
  * Constructor requires plugin params array:
@@ -54,6 +54,7 @@ if ( !defined( 'ABSPATH' ) ) {
  *      ...
  *   ),
  *   'wc_hpos'      => false // true by default, only applies if plugin depends on WooCommerce
+ *   'wc_cart_checkout_blocks' => true // Cart and Checkout blocks compatibility; nothing is declared by default
  *   'top_menu'     => false
  *   'file'         => __FILE__
  * );
@@ -69,16 +70,21 @@ if ( !defined( 'WPINC' ) ) {
  * WordPress.org package. Full source and non-Freemius premium builds retain it
  * so their local access manager continues to initialize normally.
  */
-final class XT_Framework_Package_Scope {
+final class XTFW_Package_Scope {
 }
 
-abstract class XT_Framework {
+// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+if ( !class_exists( 'XT_Framework_Package_Scope', false ) ) {
+    class_alias( 'XTFW_Package_Scope', 'XT_Framework_Package_Scope' );
+}
+// xtfw-legacy-alias:end
+abstract class XTFW_Framework {
     /**
      * Var that holds an array of all instances instances loaded
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework[] $instances
+     * @var      XTFW_Framework[] $instances
      */
     private static $_instances = array();
 
@@ -87,7 +93,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Plugin $plugin
+     * @var      XTFW_Plugin $plugin
      */
     protected $plugin;
 
@@ -96,7 +102,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Dependencies_Check dependencies_check
+     * @var      XTFW_Dependencies_Check dependencies_check
      */
     protected $dependencies_check;
 
@@ -132,7 +138,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Notices $framework_notices
+     * @var      XTFW_Notices $framework_notices
      */
     protected $framework_notices;
 
@@ -141,7 +147,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Framework_Tabs $framework_tabs
+     * @var      XTFW_Framework_Tabs $framework_tabs
      */
     protected $framework_tabs;
 
@@ -150,7 +156,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Access_Manager|Freemius $access_manager
+     * @var      XTFW_Access_Manager|Freemius $access_manager
      */
     protected $access_manager;
 
@@ -159,7 +165,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Base_Hooks $plugin_base_hooks
+     * @var      XTFW_Base_Hooks $plugin_base_hooks
      */
     protected $plugin_base_hooks;
 
@@ -168,7 +174,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Notices $plugin_notices
+     * @var      XTFW_Notices $plugin_notices
      */
     protected $plugin_notices;
 
@@ -177,7 +183,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Notices $plugin_frontend_notices
+     * @var      XTFW_Notices $plugin_frontend_notices
      */
     protected $plugin_frontend_notices;
 
@@ -186,7 +192,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Admin_Messages $admin_messages
+     * @var      XTFW_Admin_Messages $admin_messages
      */
     protected $admin_messages;
 
@@ -195,7 +201,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_System_Status $system_status
+     * @var      XTFW_System_Status $system_status
      */
     protected $system_status;
 
@@ -204,7 +210,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_i18n $plugin_locale
+     * @var      XTFW_i18n $plugin_locale
      */
     protected $plugin_locale;
 
@@ -213,7 +219,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Migration $plugin_migrations
+     * @var      XTFW_Migration $plugin_migrations
      */
     protected $plugin_migrations;
 
@@ -222,7 +228,7 @@ abstract class XT_Framework {
      *
      * @since    2.0.3
      * @access   protected
-     * @var      XT_Framework_Review_Notice $plugin_review_notice
+     * @var      XTFW_Review_Notice $plugin_review_notice
      */
     protected $plugin_review_notice;
 
@@ -231,7 +237,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Modules $modules
+     * @var      XTFW_Modules $modules
      */
     protected $modules;
 
@@ -240,7 +246,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Customizer $customizer
+     * @var      XTFW_Customizer $customizer
      */
     protected $customizer;
 
@@ -249,7 +255,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Settings $settings
+     * @var      XTFW_Settings $settings
      */
     protected $settings;
 
@@ -258,7 +264,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Plugin_Tabs $plugin_tabs
+     * @var      XTFW_Plugin_Tabs $plugin_tabs
      */
     protected $plugin_tabs;
 
@@ -276,7 +282,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Ajax $ajax
+     * @var      XTFW_Ajax $ajax
      */
     protected $ajax;
 
@@ -285,7 +291,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_WC_Ajax $wc_ajax
+     * @var      XTFW_WC_Ajax $wc_ajax
      */
     protected $wc_ajax;
 
@@ -294,7 +300,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Cache $cache
+     * @var      XTFW_Cache $cache
      */
     protected $cache;
 
@@ -303,7 +309,7 @@ abstract class XT_Framework {
      *
      * @since    1.0.0
      * @access   protected
-     * @var      XT_Framework_Transient $transient
+     * @var      XTFW_Transient $transient
      */
     protected $transient;
 
@@ -360,7 +366,7 @@ abstract class XT_Framework {
      */
     private function init_plugin( $params ) {
         if ( empty( $this->plugin ) ) {
-            $this->plugin = new XT_Framework_Plugin($params);
+            $this->plugin = new XTFW_Plugin($params);
             // Register the plugin globally
             self::register_instance( $this->plugin->slug, $this );
             $this->init_base_hooks();
@@ -523,49 +529,57 @@ abstract class XT_Framework {
             'xt-jquery-ajaxqueue',
             xtfw_dir_url( XTFW_DIR_ASSETS ) . '/js/jquery.ajaxqueue-min.js',
             array('jquery'),
-            XTFW_VERSION
+            XTFW_VERSION,
+            true
         );
         wp_register_script(
             'xt-jquery-touch',
             xtfw_dir_url( XTFW_DIR_ASSETS ) . '/js/jquery.touch-min.js',
             array('jquery'),
-            XTFW_VERSION
+            XTFW_VERSION,
+            false
         );
         wp_register_script(
             'xt-jquery-tiptip',
             xtfw_dir_url( XTFW_DIR_ASSETS ) . '/js/jquery.tiptip-min.js',
             array('jquery'),
-            XTFW_VERSION
+            XTFW_VERSION,
+            false
         );
         wp_register_script(
             'xt-jquery-inline-confirm',
             xtfw_dir_url( XTFW_DIR_ASSETS ) . '/js/jquery.inline-confirm-min.js',
             array('jquery'),
-            XTFW_VERSION
+            XTFW_VERSION,
+            false
         );
         wp_register_script(
             'xt-jquery-select2',
             xtfw_dir_url( XTFW_DIR_ASSETS ) . '/js/jquery.select2-min.js',
             array('jquery'),
-            XTFW_VERSION
+            XTFW_VERSION,
+            false
         );
         wp_register_script(
             'xt-color-picker',
             xtfw_dir_url( XTFW_DIR_ASSETS ) . '/js/wp-color-picker-alpha-min.js',
             array('wp-color-picker'),
-            XTFW_VERSION
+            XTFW_VERSION,
+            false
         );
         wp_register_script(
             'xt-sticky-sidebar',
             xtfw_dir_url( XTFW_DIR_ASSETS ) . '/js/sticky-sidebar-min.js',
             array(),
-            XTFW_VERSION
+            XTFW_VERSION,
+            false
         );
         wp_register_script(
             'xt-follow',
             xtfw_dir_url( XTFW_DIR_ASSETS ) . '/js/xt-follow-min.js',
             array(),
-            XTFW_VERSION
+            XTFW_VERSION,
+            false
         );
         wp_register_style(
             'xtfw-inline',
@@ -577,27 +591,40 @@ abstract class XT_Framework {
             'xtfw-inline',
             false,
             array('jquery'),
-            XTFW_VERSION
+            XTFW_VERSION,
+            false
         );
-        if ( !wp_script_is( 'xtfw-inline' ) ) {
-            if ( !is_admin() ) {
-                wp_add_inline_script( 'xtfw-inline', apply_filters( 'xtfw_inline_scripts', '
+        if ( !is_admin() ) {
+            // Touch detection needs no jQuery: a dependency-free head script, so the storefront
+            // no longer loads jQuery in the <head> just for this.
+            if ( !wp_script_is( 'xtfw-head', 'registered' ) ) {
+                wp_register_script(
+                    'xtfw-head',
+                    false,
+                    array(),
+                    XTFW_VERSION,
+                    false
+                );
+                wp_add_inline_script( 'xtfw-head', '
                     window.XT = (typeof window.XT !== "undefined") ? window.XT : {};
-        
+
                     XT.isTouchDevice = function () {
                         return ("ontouchstart" in document.documentElement);
                     };
-                    
-                    (function( $ ) {
-                        if (XT.isTouchDevice()) {
-                            $("html").addClass("xtfw-touchevents");
-                        }else{        
-                            $("html").addClass("xtfw-no-touchevents");
-                        }
-                    })( jQuery );
-                ' ) );
-            } else {
-                wp_add_inline_script( 'xtfw-inline', apply_filters( 'xtfw_admin_inline_scripts', '
+
+                    document.documentElement.classList.add(XT.isTouchDevice() ? "xtfw-touchevents" : "xtfw-no-touchevents");
+                ' );
+            }
+            wp_enqueue_script( 'xtfw-head' );
+            wp_enqueue_style( 'xtfw-inline' );
+            // xtfw-inline (which depends on jQuery) is only printed when something attached code to it.
+            add_action( 'wp_head', array($this, 'maybe_enqueue_inline_script'), 8 );
+            add_action( 'wp_footer', array($this, 'maybe_enqueue_inline_script'), 19 );
+            return;
+        }
+        if ( !wp_script_is( 'xtfw-inline' ) ) {
+            if ( is_admin() ) {
+                wp_add_inline_script( 'xtfw-inline', '
                     (function( $ ) {
                         $(function() {
                             // Hide XT Plugins menu divider if no plugins are shown
@@ -609,11 +636,28 @@ abstract class XT_Framework {
                             });
                         });
                     })( jQuery );
-                ' ) );
+                ' );
             }
         }
         wp_enqueue_style( 'xtfw-inline' );
         wp_enqueue_script( 'xtfw-inline' );
+    }
+
+    /**
+     * Front end: print xtfw-inline (and its jQuery dependency) only when code was attached to it,
+     * checked just before WordPress prints the head scripts and again before the footer scripts.
+     *
+     * @since    2.6.0
+     * @access   public
+     */
+    public function maybe_enqueue_inline_script() {
+        $scripts = wp_scripts();
+        if ( wp_script_is( 'xtfw-inline', 'enqueued' ) || !wp_script_is( 'xtfw-inline', 'registered' ) ) {
+            return;
+        }
+        if ( $scripts->get_data( 'xtfw-inline', 'before' ) || $scripts->get_data( 'xtfw-inline', 'after' ) ) {
+            wp_enqueue_script( 'xtfw-inline' );
+        }
     }
 
     /**
@@ -624,7 +668,7 @@ abstract class XT_Framework {
      */
     public function init_framework_notices() {
         if ( empty( $this->framework_notices ) ) {
-            $this->framework_notices = new XT_Framework_Notices($this->framework_slug(), $this->framework_menu_name());
+            $this->framework_notices = new XTFW_Notices($this->framework_slug(), $this->framework_menu_name());
         }
     }
 
@@ -636,7 +680,7 @@ abstract class XT_Framework {
      */
     public function init_plugin_notices() {
         if ( empty( $this->plugin_notices ) ) {
-            $this->plugin_notices = new XT_Framework_Notices($this->plugin_slug(), $this->plugin_name());
+            $this->plugin_notices = new XTFW_Notices($this->plugin_slug(), $this->plugin_name());
         }
     }
 
@@ -647,7 +691,7 @@ abstract class XT_Framework {
      */
     public function init_cache() {
         if ( empty( $this->cache ) ) {
-            $this->cache = new XT_Framework_Cache($this->plugin_short_prefix());
+            $this->cache = new XTFW_Cache($this->plugin_short_prefix());
         }
     }
 
@@ -658,7 +702,7 @@ abstract class XT_Framework {
      */
     public function init_transient() {
         if ( empty( $this->transient ) ) {
-            $this->transient = new XT_Framework_Transient($this->plugin_short_prefix());
+            $this->transient = new XTFW_Transient($this->plugin_short_prefix());
         }
     }
 
@@ -671,7 +715,7 @@ abstract class XT_Framework {
     public function init_plugin_frontend_notices() {
         if ( empty( $this->plugin_frontend_notices ) ) {
             $is_plugin_for_woocommerce = $this->plugin_dependencies()->depends_on( 'WooCommerce' );
-            $this->plugin_frontend_notices = new XT_Framework_Notices(
+            $this->plugin_frontend_notices = new XTFW_Notices(
                 $this->plugin_slug(),
                 null,
                 true,
@@ -686,7 +730,7 @@ abstract class XT_Framework {
      * @since    1.0.0
      */
     public function init_conflicts_check() {
-        new XT_Framework_Conflicts_Check($this);
+        new XTFW_Conflicts_Check($this);
     }
 
     /**
@@ -696,7 +740,7 @@ abstract class XT_Framework {
      */
     public function init_dependencies_check() {
         if ( empty( $this->dependencies_check ) ) {
-            $this->dependencies_check = new XT_Framework_Dependencies_Check($this);
+            $this->dependencies_check = new XTFW_Dependencies_Check($this);
         }
     }
 
@@ -719,9 +763,10 @@ abstract class XT_Framework {
                 10,
                 2
             );
-            $this->access_manager->add_filter( 'checkout/purchaseCompleted', array($this, 'after_purchase_js') );
-            $this->access_manager->add_filter( 'templates/checkout.php', array($this, 'checkout_gtm_script') );
-            add_action( 'admin_enqueue_scripts', array($this, 'enqueue_checkout_gtm_script') );
+            // Purchase tracking lives in its own file, which WordPress.org packages leave out.
+            if ( class_exists( 'XTFW_Checkout_Tracking' ) ) {
+                new XTFW_Checkout_Tracking($this, $this->access_manager);
+            }
             $this->access_manager->add_filter( 'freemius_pricing_js_path', array($this, 'pricing_js_path') );
             $this->access_manager->add_filter( 'hide_freemius_powered_by', '__return_true' );
             $this->access_manager->add_filter( 'hide_billing_and_payments_info', '__return_true' );
@@ -743,9 +788,11 @@ abstract class XT_Framework {
                 add_action( 'init', $override_i18n, 0 );
             }
             // Signal that Freemius SDK was initiated.
+            // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action( $this->plugin_short_prefix( 'fs_loaded' ) );
+            // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
         } else {
-            $this->access_manager = new XT_Framework_Package_Scope();
+            $this->access_manager = new XTFW_Package_Scope();
         }
     }
 
@@ -760,88 +807,6 @@ abstract class XT_Framework {
             $is_visible = false;
         }
         return $is_visible;
-    }
-
-    public function after_purchase_js() {
-        $plugin_name = wp_json_encode( $this->plugin_name() );
-        $product_id = absint( $this->market_product()->id );
-        return 'function ( data ) {
-                    
-                 /**
-                 * Since the user just entered their personal & billing information, agreed to the TOS & privacy,
-                 * know they are running within a secure iframe from an external domain, they implicitly permit tracking
-                 * this purchase. So initializing GTM here (after the purchase), is legitimate.
-                 */
-                 
-                var is_subscription = typeof(data.purchase.initial_amount) !== "undefined";
-                var is_trial = typeof(data.purchase.trial_ends) !== "undefined" && data.purchase.trial_ends !== null;
-                var total = is_subscription ? data.purchase.initial_amount : data.purchase.gross;
-                total = is_trial ? 0 : total;
-    
-                var coupon = data && data.coupon ? data.coupon.code : "";
-                var currency = data && data.currency ? data.currency.toUpperCase() : "USD";
-
-                var item = {
-                    item_name: ' . $plugin_name . ',
-                    item_id: ' . $product_id . ',
-                    item_brand: "XplodedThemes",
-                    affiliation: "XplodedThemes",
-                    price: data.total,
-                    discount: 0,
-                    currency: currency,
-                    coupon: coupon,
-                    index: 1,
-                    quantity: 1
-                };
-        
-                // Purchase Event
-                dataLayer.push({ ecommerce: null });  // Clear the previous ecommerce object.
-                dataLayer.push({
-                    event: "purchase",
-                    ecommerce: {
-                        transaction_id: data.purchase.id,
-                        affiliation: item.affiliation,
-                        tax: 0,
-                        shipping: 0,
-                        items: [item],
-                        currency: item.currency,
-                        coupon: item.coupon,
-                        value: total
-                    }
-                });
-        }';
-    }
-
-    public function checkout_gtm_script( $html ) {
-        return $html;
-    }
-
-    /**
-     * Enqueue Google Tag Manager only inside the user-initiated Freemius checkout.
-     *
-     * @return void
-     */
-    public function enqueue_checkout_gtm_script() {
-        if ( empty( $this->access_manager ) || !$this->access_manager->is_admin_page( 'pricing' ) ) {
-            return;
-        }
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only checkout routing.
-        $checkout = ( isset( $_GET['checkout'] ) && is_scalar( $_GET['checkout'] ) ? sanitize_text_field( wp_unslash( $_GET['checkout'] ) ) : '' );
-        if ( 'true' !== $checkout ) {
-            return;
-        }
-        $handle = 'xtfw-google-tag-manager';
-        $src = add_query_arg( 'id', rawurlencode( XTFW_GTM_ID ), 'https://www.googletagmanager.com/gtm.js' );
-        wp_register_script(
-            $handle,
-            $src,
-            array(),
-            null,
-            false
-        );
-        wp_script_add_data( $handle, 'strategy', 'async' );
-        wp_add_inline_script( $handle, "window.dataLayer = window.dataLayer || []; window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});", 'before' );
-        wp_enqueue_script( $handle );
     }
 
     public function pricing_js_path() {
@@ -861,14 +826,14 @@ abstract class XT_Framework {
      */
     public function init_base_hooks() {
         if ( empty( $this->plugin_base_hooks ) ) {
-            $this->plugin_base_hooks = new XT_Framework_Base_Hooks($this);
+            $this->plugin_base_hooks = new XTFW_Base_Hooks($this);
         }
     }
 
     /**
      * Define the locale for this plugin for internationalization.
      *
-     * Uses the XT_Framework_i18n class in order to set the domain and to register the hook
+     * Uses the XTFW_i18n class in order to set the domain and to register the hook
      * with WordPress.
      *
      * @since    1.0.0
@@ -876,7 +841,7 @@ abstract class XT_Framework {
      */
     private function init_plugin_locale() {
         if ( empty( $this->plugin_locale ) ) {
-            $this->plugin_locale = new XT_Framework_i18n($this->plugin_data( 'TextDomain' ), $this->plugin_file());
+            $this->plugin_locale = new XTFW_i18n($this->plugin_data( 'TextDomain' ), $this->plugin_file());
         }
     }
 
@@ -888,7 +853,7 @@ abstract class XT_Framework {
      */
     public function init_customizer() {
         if ( empty( $this->customizer ) && has_filter( $this->plugin_prefix( 'customizer_fields' ) ) ) {
-            $this->customizer = new XT_Framework_Customizer($this);
+            $this->customizer = new XTFW_Customizer($this);
         }
     }
 
@@ -900,7 +865,7 @@ abstract class XT_Framework {
      */
     public function init_settings() {
         if ( empty( $this->settings ) && has_filter( $this->plugin_prefix( 'setting_tabs' ) ) ) {
-            $this->settings = new XT_Framework_Settings($this);
+            $this->settings = new XTFW_Settings($this);
         }
     }
 
@@ -915,7 +880,7 @@ abstract class XT_Framework {
             return;
         }
         if ( empty( $this->framework_tabs ) ) {
-            $this->framework_tabs = XT_Framework_Framework_Tabs::instance( $this );
+            $this->framework_tabs = XTFW_Framework_Tabs::instance( $this );
         }
     }
 
@@ -926,7 +891,7 @@ abstract class XT_Framework {
      * @access   private
      */
     public function init_plugin_tabs() {
-        $this->plugin_tabs = new XT_Framework_Plugin_Tabs($this);
+        $this->plugin_tabs = new XTFW_Plugin_Tabs($this);
     }
 
     /**
@@ -937,7 +902,7 @@ abstract class XT_Framework {
      */
     public function init_system_status() {
         if ( empty( $this->system_status ) ) {
-            $this->system_status = XT_Framework_System_Status::instance( $this );
+            $this->system_status = XTFW_System_Status::instance( $this );
         }
     }
 
@@ -949,7 +914,7 @@ abstract class XT_Framework {
      */
     public function init_plugin_migrations() {
         if ( empty( $this->plugin_migrations ) ) {
-            $this->plugin_migrations = new XT_Framework_Migration($this);
+            $this->plugin_migrations = new XTFW_Migration($this);
         }
     }
 
@@ -960,7 +925,7 @@ abstract class XT_Framework {
      * @access   private
      */
     public function init_recommended_plugins() {
-        XT_Framework_Recommended_Plugins::instance( $this );
+        XTFW_Recommended_Plugins::instance( $this );
     }
 
     /**
@@ -971,7 +936,7 @@ abstract class XT_Framework {
      */
     public function init_plugin_review_notice() {
         if ( empty( $this->plugin_review_notice ) && !$this->plugin()->premium_only() && !empty( $this->plugin()->market_product()->freemium_slug ) ) {
-            $this->plugin_review_notice = new XT_Framework_Review_Notice($this);
+            $this->plugin_review_notice = new XTFW_Review_Notice($this);
         }
     }
 
@@ -983,7 +948,7 @@ abstract class XT_Framework {
      */
     public function init_admin_messages() {
         if ( empty( $this->admin_messages ) ) {
-            $this->admin_messages = new XT_Framework_Admin_Messages($this);
+            $this->admin_messages = new XTFW_Admin_Messages($this);
         }
     }
 
@@ -995,7 +960,7 @@ abstract class XT_Framework {
      */
     public function init_ajax() {
         if ( empty( $this->ajax ) && (has_filter( $this->plugin_prefix( 'ajax_add_events' ) ) || has_filter( $this->plugin_prefix( 'ajax_remove_events' ) )) ) {
-            $this->ajax = new XT_Framework_Ajax($this);
+            $this->ajax = new XTFW_Ajax($this);
         }
     }
 
@@ -1007,7 +972,7 @@ abstract class XT_Framework {
      */
     public function init_wc_ajax() {
         if ( empty( $this->wc_ajax ) && $this->plugin_dependencies()->depends_on( 'WooCommerce' ) && (has_filter( $this->plugin_prefix( 'wc_ajax_add_events' ) ) || has_filter( $this->plugin_prefix( 'wc_ajax_remove_events' ) )) && function_exists( 'wc' ) ) {
-            $this->wc_ajax = new XT_Framework_WC_Ajax($this);
+            $this->wc_ajax = new XTFW_WC_Ajax($this);
         }
     }
 
@@ -1092,7 +1057,7 @@ abstract class XT_Framework {
      */
     public function init_modules() {
         if ( empty( $this->modules ) && has_filter( $this->plugin_prefix( 'modules' ) ) ) {
-            $this->modules = new XT_Framework_Modules($this);
+            $this->modules = new XTFW_Modules($this);
         }
     }
 
@@ -1240,7 +1205,7 @@ abstract class XT_Framework {
     /**
      * The plugin info
      *
-     * @return    XT_Framework_Plugin    The plugin info.
+     * @return    XTFW_Plugin    The plugin info.
      * @since     1.0.0
      */
     public function plugin() {
@@ -1645,7 +1610,7 @@ abstract class XT_Framework {
     /**
      * The reference to the class that manages the modules
      *
-     * @return    XT_Framework_Modules
+     * @return    XTFW_Modules
      * @since     1.0.0
      */
     public function modules() {
@@ -1668,7 +1633,7 @@ abstract class XT_Framework {
     /**
      * The reference to the class that manages the cache
      *
-     * @return    XT_Framework_Cache
+     * @return    XTFW_Cache
      * @since     1.0.0
      */
     public function cache() {
@@ -1681,7 +1646,7 @@ abstract class XT_Framework {
     /**
      * The reference to the class that manages the cache
      *
-     * @return    XT_Framework_Transient
+     * @return    XTFW_Transient
      * @since     1.0.0
      */
     public function transient() {
@@ -1720,7 +1685,7 @@ abstract class XT_Framework {
     /**
      * Get Base Hooks Instance
      *
-     * @return    XT_Framework_Base_Hooks
+     * @return    XTFW_Base_Hooks
      * @since     1.0.0
      */
     public function plugin_base_hooks() {
@@ -1733,7 +1698,7 @@ abstract class XT_Framework {
     /**
      * Get Dependencies Check Instance
      *
-     * @return    XT_Framework_Dependencies_Check
+     * @return    XTFW_Dependencies_Check
      * @since     1.0.0
      */
     public function plugin_dependencies() {
@@ -1746,7 +1711,7 @@ abstract class XT_Framework {
     /**
      * Get License Manager Instance
      *
-     * @return    XT_Framework_Access_Manager|Freemius
+     * @return    XTFW_Access_Manager|Freemius
      * @since     1.0.0
      */
     public function access_manager() {
@@ -1759,7 +1724,7 @@ abstract class XT_Framework {
     /**
      * Get Framework Notices Instance
      *
-     * @return    XT_Framework_Notices
+     * @return    XTFW_Notices
      * @since     1.0.0
      */
     public function framework_notices() {
@@ -1772,7 +1737,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Notices Instance
      *
-     * @return    XT_Framework_Notices
+     * @return    XTFW_Notices
      * @since     1.0.0
      */
     public function plugin_notices() {
@@ -1785,7 +1750,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Frontend Notices Instance
      *
-     * @return    XT_Framework_Notices
+     * @return    XTFW_Notices
      * @since     1.0.0
      */
     public function plugin_frontend_notices() {
@@ -1798,7 +1763,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Review Notice
      *
-     * @return    XT_Framework_Review_Notice
+     * @return    XTFW_Review_Notice
      * @since     2.0.3
      */
     public function plugin_review_notice() {
@@ -1811,7 +1776,7 @@ abstract class XT_Framework {
     /**
      * Get Admin Messages Instance
      *
-     * @return    XT_Framework_Admin_Messages
+     * @return    XTFW_Admin_Messages
      * @since     1.0.0
      */
     public function admin_messages() {
@@ -1824,7 +1789,7 @@ abstract class XT_Framework {
     /**
      * Get System Status Instance
      *
-     * @return    XT_Framework_System_Status
+     * @return    XTFW_System_Status
      * @since     1.0.0
      */
     public function system_status() {
@@ -1837,7 +1802,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Migrations Instance
      *
-     * @return    XT_Framework_Migration
+     * @return    XTFW_Migration
      * @since     1.0.0
      */
     public function plugin_migrations() {
@@ -1850,7 +1815,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Locale Instance
      *
-     * @return    XT_Framework_i18n
+     * @return    XTFW_i18n
      * @since     1.0.0
      */
     public function plugin_locale() {
@@ -1863,7 +1828,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Customizer Instance
      *
-     * @return    XT_Framework_Customizer
+     * @return    XTFW_Customizer
      * @since     1.0.0
      */
     public function customizer() {
@@ -1876,7 +1841,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Settings Instance
      *
-     * @return    XT_Framework_Plugin_Settings
+     * @return    XTFW_Plugin_Settings
      * @since     1.0.0
      */
     public function settings() {
@@ -1889,7 +1854,7 @@ abstract class XT_Framework {
     /**
      * Get Framework Tabs Instance
      *
-     * @return    XT_Framework_Framework_Tabs
+     * @return    XTFW_Framework_Tabs
      * @since     1.0.0
      */
     public function framework_tabs() {
@@ -1902,7 +1867,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Tabs Instance
      *
-     * @return    XT_Framework_plugin_tabs
+     * @return    XTFW_plugin_tabs
      * @since     1.0.0
      */
     public function plugin_tabs() {
@@ -1915,7 +1880,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin Ajax
      *
-     * @return    XT_Framework_Ajax
+     * @return    XTFW_Ajax
      * @since     1.0.0
      */
     public function ajax() {
@@ -1928,7 +1893,7 @@ abstract class XT_Framework {
     /**
      * Get Plugin WC Ajax
      *
-     * @return    XT_Framework_WC_Ajax
+     * @return    XTFW_WC_Ajax
      * @since     1.0.0
      */
     public function wc_ajax() {
@@ -2011,7 +1976,9 @@ abstract class XT_Framework {
      * @since     1.0.0
      */
     public function template_path() {
+        // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
         return apply_filters( $this->plugin_prefix( 'template_path' ), $this->plugin_slug() . '/' );
+        // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
     }
 
     /**
@@ -2041,7 +2008,9 @@ abstract class XT_Framework {
             $template = $this->get_plugin_template( $slug );
         }
         // Allow 3rd party plugins to filter template file from their plugin.
+        // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
         $template = apply_filters( $this->plugin_prefix( 'template' ), $template, $slug );
+        // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
         if ( $locateOnly ) {
             return $template;
         }
@@ -2161,13 +2130,18 @@ abstract class XT_Framework {
     function wc_declare_compatibility() {
         if ( class_exists( '\\Automattic\\WooCommerce\\Utilities\\FeaturesUtil' ) ) {
             \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', $this->plugin_file(), $this->plugin()->wc_hpos() );
+            // Plugins opt in (or out) once their support for the Cart and Checkout blocks is verified.
+            $cart_checkout_blocks = ( method_exists( $this->plugin(), 'wc_cart_checkout_blocks' ) ? $this->plugin()->wc_cart_checkout_blocks() : null );
+            if ( null !== $cart_checkout_blocks ) {
+                \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', $this->plugin_file(), (bool) $cart_checkout_blocks );
+            }
         }
     }
 
     /**
      * Get loaded instances array
      *
-     * @return XT_Framework[]
+     * @return XTFW_Framework[]
      * @since 1.0.0
      * @static
      */
@@ -2224,7 +2198,7 @@ abstract class XT_Framework {
      * Register plugin
      *
      * @param $slug
-     * @param $instance XT_Framework
+     * @param $instance XTFW_Framework
      *
      * @since 1.0.0
      * @static
@@ -2264,7 +2238,7 @@ abstract class XT_Framework {
      *
      * @param $slug
      *
-     * @return XT_Framework
+     * @return XTFW_Framework
      * @since 1.0.0
      * @static
      */
@@ -2277,7 +2251,7 @@ abstract class XT_Framework {
      *
      * @param $freemium_slug
      *
-     * @return XT_Framework
+     * @return XTFW_Framework
      * @since 1.0.0
      * @static
      */
@@ -2293,7 +2267,7 @@ abstract class XT_Framework {
     /**
      * Get first instance
      *
-     * @return XT_Framework
+     * @return XTFW_Framework
      * @since 1.7.0
      * @static
      */
@@ -2324,3 +2298,9 @@ abstract class XT_Framework {
 
     // End __wakeup()
 }
+
+// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+if ( !class_exists( 'XT_Framework', false ) ) {
+    class_alias( 'XTFW_Framework', 'XT_Framework' );
+}
+// xtfw-legacy-alias:end

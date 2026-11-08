@@ -3,24 +3,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Conflicts_Check' ) ) {
+if ( ! class_exists( 'XTFW_Conflicts_Check' ) ) {
 
 	/**
 	 * Class that takes care of disabling plugin conflicts and throws notices
 	 *
 	 * @since      1.0.0
-	 * @package    XT_Framework
-	 * @subpackage XT_Framework/includes
+	 * @package    XTFW_Framework
+	 * @subpackage XTFW_Framework/includes
 	 * @author     XplodedThemes
 	 */
-	class XT_Framework_Conflicts_Check {
+	class XTFW_Conflicts_Check {
 
 		/**
 		 * Core class reference.
 		 *
 		 * @since    1.0.0
 		 * @access   private
-		 * @var      XT_Framework $core Core Class
+		 * @var      XTFW_Framework $core Core Class
 		 */
 		private $core;
 
@@ -31,7 +31,7 @@ if ( ! class_exists( 'XT_Framework_Conflicts_Check' ) ) {
 		 *
 		 * @since    1.0.0
 		 * @access   public
-		 * @var      XT_Framework $core Core Class
+		 * @var      XTFW_Framework $core Core Class
 		 */
 		public function __construct( $core ) {
 
@@ -84,6 +84,7 @@ if ( ! class_exists( 'XT_Framework_Conflicts_Check' ) ) {
 				if ( ! empty( $item->failed ) ) {
 
 					$this->core->plugin_notices()->add_warning_message( sprintf(
+						/* translators: 1: conflicting plugin name, 2: this plugin's name. */
 						esc_html__( '%1$s conflicts with %2$s. Please deactivate %1$s to avoid issues.', 'xt-framework' ),
 						'<strong>' . $item->name . '</strong>',
 						'<strong>' . $this->core->plugin_name() . '</strong>'
@@ -93,4 +94,10 @@ if ( ! class_exists( 'XT_Framework_Conflicts_Check' ) ) {
 			}
 		}
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_Conflicts_Check', false ) ) {
+		class_alias( 'XTFW_Conflicts_Check', 'XT_Framework_Conflicts_Check' );
+	}
+	// xtfw-legacy-alias:end
 }

@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Helper class for color manipulation.
  */
-final class Xirki_Color extends ariColor {
+final class Xirki_Color extends Xirki_AriColor {
 
 	/**
 	 * A proxy for the sanitize_color method.
@@ -64,7 +64,7 @@ final class Xirki_Color extends ariColor {
 		if ( is_string( $color ) && 'transparent' == trim( $color ) ) {
 			return 'transparent';
 		}
-		$obj = ariColor::newColor( $color );
+		$obj = Xirki_AriColor::newColor( $color );
 		if ( 'auto' == $mode ) {
 			$mode = $obj->mode;
 		}
@@ -81,7 +81,7 @@ final class Xirki_Color extends ariColor {
 	 * @return array|string
 	 */
 	public static function get_rgb( $color, $implode = false ) {
-		$obj = ariColor::newColor( $color );
+		$obj = Xirki_AriColor::newColor( $color );
 		if ( $implode ) {
 			return $obj->toCSS( 'rgb' );
 		}
@@ -109,7 +109,7 @@ final class Xirki_Color extends ariColor {
 	 * @return int|float    The alpha value of the color.
 	 */
 	public static function get_alpha_from_rgba( $color ) {
-		$obj = ariColor::newColor( $color );
+		$obj = Xirki_AriColor::newColor( $color );
 		return $obj->alpha;
 	}
 
@@ -123,7 +123,7 @@ final class Xirki_Color extends ariColor {
 	 * @return string
 	 */
 	public static function get_rgba( $color = '#fff', $alpha = 1 ) {
-		$obj = ariColor::newColor( $color );
+		$obj = Xirki_AriColor::newColor( $color );
 		if ( 1 == $alpha ) {
 			return $obj->toCSS( 'rgba' );
 		}
@@ -152,7 +152,7 @@ final class Xirki_Color extends ariColor {
 	 * @return string       The corresponding RGB string.
 	 */
 	public static function rgba_to_rgb( $color ) {
-		$obj = ariColor::newColor( $color );
+		$obj = Xirki_AriColor::newColor( $color );
 		return $obj->toCSS( 'rgb' );
 	}
 

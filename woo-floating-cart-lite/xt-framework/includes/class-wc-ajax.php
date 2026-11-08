@@ -3,16 +3,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'XT_Framework_WC_Ajax' ) ) {
+if ( ! class_exists( 'XTFW_WC_Ajax' ) ) {
 
-	class XT_Framework_WC_Ajax {
+	class XTFW_WC_Ajax {
 
 		/**
 		 * Core class reference.
 		 *
 		 * @since    1.0.0
 		 * @access   private
-		 * @var      XT_Framework   $core    Core Class
+		 * @var      XTFW_Framework   $core    Core Class
 		 */
 		protected $core;
 
@@ -39,7 +39,7 @@ if ( ! class_exists( 'XT_Framework_WC_Ajax' ) ) {
 		 *
 		 * @since    1.0.0
 		 * @access   public
-		 * @var      XT_Framework $core Core Class
+		 * @var      XTFW_Framework $core Core Class
 		 */
 		public function __construct( $core ) {
 
@@ -67,7 +67,9 @@ if ( ! class_exists( 'XT_Framework_WC_Ajax' ) ) {
 		 */
 		public function init() {
 
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
 			$this->ajax_add_events = apply_filters($this->core->plugin_prefix('wc_ajax_add_events'), $this->ajax_add_events, $this);
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
 			$this->ajax_remove_events = apply_filters($this->core->plugin_prefix('wc_ajax_remove_events'), $this->ajax_remove_events, $this);
 
 			// Add events
@@ -112,4 +114,10 @@ if ( ! class_exists( 'XT_Framework_WC_Ajax' ) ) {
 			return $url;
 		}
 	}
+
+	// xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+	if ( ! class_exists( 'XT_Framework_WC_Ajax', false ) ) {
+		class_alias( 'XTFW_WC_Ajax', 'XT_Framework_WC_Ajax' );
+	}
+	// xtfw-legacy-alias:end
 }

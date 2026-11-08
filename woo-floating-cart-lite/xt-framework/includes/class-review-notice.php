@@ -3,24 +3,24 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Review_Notice' ) ) {
+if ( ! class_exists( 'XTFW_Review_Notice' ) ) {
 
     /**
      * Class that takes care of adding plugin review notice after X days
      *
-     * @package    XT_Framework
-     * @subpackage XT_Framework/includes
+     * @package    XTFW_Framework
+     * @subpackage XTFW_Framework/includes
      * @author     XplodedThemes
      */
 
-    class XT_Framework_Review_Notice {
+    class XTFW_Review_Notice {
 
         /**
          * Core class reference.
          *
          * @since    1.0.0
          * @access   protected
-         * @var      XT_Framework   $core    Core Class
+         * @var      XTFW_Framework   $core    Core Class
          */
         protected $core;
 
@@ -65,7 +65,7 @@ if ( ! class_exists( 'XT_Framework_Review_Notice' ) ) {
          *
          * @since    1.0.0
          * @access   public
-         * @var      XT_Framework $core Core Class
+         * @var      XTFW_Framework $core Core Class
          */
         public function __construct( $core ) {
 
@@ -161,7 +161,7 @@ if ( ! class_exists( 'XT_Framework_Review_Notice' ) ) {
             $this->rate_plugin($rate_action);
 
             // Apply the "Nope, maybe later" action to the rest of the active XT plugins as well.
-            foreach (XT_Framework::instances() as $instance) {
+            foreach (XTFW_Framework::instances() as $instance) {
 
                 if($instance->plugin_slug() === $this->core->plugin_slug()) {
                     continue;
@@ -212,9 +212,11 @@ if ( ! class_exists( 'XT_Framework_Review_Notice' ) ) {
                 $time_passed = $this->get_readable_days_passed();
                 $action = $this->core->ajax()->get_ajax_action('plugin_rate_action');
 
-                echo wp_kses_post( sprintf( __( "Hey %s, I noticed you've been using %s for the past %s – that’s awesome!", 'xt-framework' ), esc_html( $first_name ), '<strong>' . esc_html( $this->core->plugin_menu_name() ) . '</strong>', '<strong>' . esc_html( $time_passed ) . '</strong>' ) );
+                /* translators: 1: user's first name, 2: plugin name, 3: time since installation. */
+                echo wp_kses_post( sprintf( __( 'Hey %1$s, I noticed you\'ve been using %2$s for the past %3$s – that’s awesome!', 'xt-framework' ), esc_html( $first_name ), '<strong>' . esc_html( $this->core->plugin_menu_name() ) . '</strong>', '<strong>' . esc_html( $time_passed ) . '</strong>' ) );
                 echo '&nbsp;';
-                echo wp_kses_post( sprintf( __( 'Could you please do me a %1$sBIG favor%2$s and give it a %1$s5-star rating%2$s on WordPress? Just to %1$s help us%2$s spread the word and boost our motivation. Many thanks!', 'xt-framework' ), '<strong>', '</strong>' ) );
+                /* translators: 1: opening strong tag, 2: closing strong tag. */
+                echo wp_kses_post( sprintf( __( 'Could you please do me a %1$sBIG favor%2$s and %1$sleave a review%2$s on WordPress.org? Just to %1$s help us%2$s spread the word and boost our motivation. Many thanks!', 'xt-framework' ), '<strong>', '</strong>' ) );
                 ?>
                 <br><em>~ Georges H</em>
                 <br><br>
@@ -264,4 +266,10 @@ if ( ! class_exists( 'XT_Framework_Review_Notice' ) ) {
         }
 
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Review_Notice', false ) ) {
+    	class_alias( 'XTFW_Review_Notice', 'XT_Framework_Review_Notice' );
+    }
+    // xtfw-legacy-alias:end
 }

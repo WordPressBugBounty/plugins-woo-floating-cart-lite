@@ -10,7 +10,7 @@
 
 .wc-metaboxes-wrapper {
 
-  .options_group {
+  .options_group:has(.xtfw-title-separator) {
     border-top: 1px solid #fff;
     border-bottom: 1px solid #eee;
     overflow: hidden;

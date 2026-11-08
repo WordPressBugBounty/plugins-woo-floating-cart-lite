@@ -6,11 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'ariColor' ) ) {
+if ( ! class_exists( 'Xirki_AriColor' ) ) {
 	/**
 	 * The color calculations class.
 	 */
-	class ariColor {
+	class Xirki_AriColor {
 
 		/**
 		 * An array of our instances.
@@ -210,7 +210,7 @@ if ( ! class_exists( 'ariColor' ) ) {
 		 * @since 1.0.0
 		 * @param string|array $color The color.
 		 * @param string       $mode  Mode to be used.
-		 * @return ariColor    (object)
+		 * @return Xirki_AriColor    (object)
 		 */
 		public static function newColor( $color, $mode = 'auto' ) {
 
@@ -231,7 +231,7 @@ if ( ! class_exists( 'ariColor' ) ) {
 		 * @since 1.1
 		 * @param string|array $color The color.
 		 * @param string       $mode  Mode to be used.
-		 * @return ariColor    (object)
+		 * @return Xirki_AriColor    (object)
 		 */
 		public static function new_color( $color, $mode = 'auto' ) {
 			return self::newColor( $color, $mode );
@@ -252,7 +252,7 @@ if ( ! class_exists( 'ariColor' ) ) {
 		 *                             lightness,
 		 *                             brightness.
 		 * @param int|float|string $value      The new value.
-		 * @return ariColor|null
+		 * @return Xirki_AriColor|null
 		 */
 		public function getNew( $property = '', $value = '' ) {
 
@@ -313,7 +313,7 @@ if ( ! class_exists( 'ariColor' ) ) {
 		 *                             lightness,
 		 *                             brightness.
 		 * @param int|float|string $value      The new value.
-		 * @return ariColor|null
+		 * @return Xirki_AriColor|null
 		 */
 		public function get_new( $property = '', $value = '' ) {
 			return $this->getNew( $property, $value );

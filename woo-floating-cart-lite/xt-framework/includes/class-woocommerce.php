@@ -3,9 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Woocommerce' ) ) {
+if ( ! class_exists( 'XTFW_Woocommerce' ) ) {
 
-    class XT_Framework_Woocommerce {
+    class XTFW_Woocommerce {
 
         public static function wrap_product_images() {
 
@@ -16,7 +16,7 @@ if ( ! class_exists( 'XT_Framework_Woocommerce' ) ) {
             add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_styles'));
 
             // Flatsome theme
-            if(XT_Framework::first_instance()->is_theme('Flatsome')) {
+            if(XTFW_Framework::first_instance()->is_theme('Flatsome')) {
                 add_action('flatsome_woocommerce_shop_loop_images', array(__CLASS__, 'template_loop_before_product_thumbnail'), 9);
                 add_action('flatsome_woocommerce_shop_loop_images', array(__CLASS__, 'template_loop_after_product_thumbnail'), 12);
 
@@ -86,4 +86,10 @@ if ( ! class_exists( 'XT_Framework_Woocommerce' ) ) {
         }
 
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Woocommerce', false ) ) {
+    	class_alias( 'XTFW_Woocommerce', 'XT_Framework_Woocommerce' );
+    }
+    // xtfw-legacy-alias:end
 }

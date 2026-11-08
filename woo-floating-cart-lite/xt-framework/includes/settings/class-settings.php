@@ -3,23 +3,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if(!class_exists('XT_Framework_Settings')) {
+if(!class_exists('XTFW_Settings')) {
 
     /**
      * Plugin Settings, extend admin tabs to support setting panels
      *
-     * @package    XT_Framework_Settings
+     * @package    XTFW_Settings
      * @author     XplodedThemes
      */
 
-    class XT_Framework_Settings {
+    class XTFW_Settings {
 
         /**
          * Core class reference.
          *
          * @since    1.0.0
          * @access   private
-         * @var      XT_Framework    core    Core Class
+         * @var      XTFW_Framework    core    Core Class
          */
         private $core;
 
@@ -29,7 +29,7 @@ if(!class_exists('XT_Framework_Settings')) {
          * Initialize the class and set its properties.
          *
          * @since    1.0.0
-         * @var      XT_Framework    core    Core Class
+         * @var      XTFW_Framework    core    Core Class
          */
         public function __construct( $core ) {
 
@@ -87,6 +87,7 @@ if(!class_exists('XT_Framework_Settings')) {
 
              return $this->core->cache()->result($this->core->plugin_prefix('setting_tabs_'.(string)($withValues)), function() use($withValues) {
 
+                 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
                  return $this->sanitize_setting_tabs(apply_filters($this->core->plugin_prefix('setting_tabs'), array() ), $withValues);
              });
 
@@ -113,6 +114,7 @@ if(!class_exists('XT_Framework_Settings')) {
 
                 $tab['settings'] = is_callable($tab['settings']) ? $tab['settings']() : $tab['settings'];
 
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
                 $tab['settings'] = apply_filters( $this->core->plugin_prefix('settings_'.$tab['id']),
                     $this->sanitize_fields($tab['settings'], $withValues),
                     $tab['settings']
@@ -251,11 +253,11 @@ if(!class_exists('XT_Framework_Settings')) {
 
         public function get_current_setting_tab_id() {
 
-            // Navigation state is read-only here; save and AJAX callers verify their nonce before using it.
-            // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            // phpcs:disable WordPress.Security.NonceVerification.Missing -- Navigation state only; save and AJAX callers verify their nonce before using it.
             if ( ! empty( $_POST['tab'] ) && is_scalar( $_POST['tab'] ) ) {
                 return sanitize_key( wp_unslash( $_POST['tab'] ) );
             }
+            // phpcs:enable WordPress.Security.NonceVerification.Missing
 
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             return ! empty( $_GET['tab'] ) && is_scalar( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
@@ -598,9 +600,16 @@ if(!class_exists('XT_Framework_Settings')) {
 
             foreach($css_array as $element => $properties) {
 
+                $element = xtfw_sanitize_css_value( $element );
+                if ( '' === $element ) {
+                    continue;
+                }
+
                 $css .= $element.'{';
                 foreach($properties as $property => $value) {
-                     if(!empty($value)) {
+                     $property = preg_replace( '/[^a-zA-Z0-9\-]/', '', (string) $property );
+                     $value    = is_array( $value ) ? '' : xtfw_sanitize_css_value( $value );
+                     if(!empty($property) && '' !== $value) {
                         $css .= $property.':'.$value.';';
                      }
                 }
@@ -625,7 +634,7 @@ if(!class_exists('XT_Framework_Settings')) {
 
             if(!empty($css)) {
 
-                wp_add_inline_style($handle, $css);
+                wp_add_inline_style($handle, xtfw_esc_css( $css ));
             }
         }
 
@@ -782,7 +791,9 @@ if(!class_exists('XT_Framework_Settings')) {
 
             $form_classes = implode(" ", $form_classes);
 
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action($this->core->plugin_prefix('settings_rendering'), $tab_id);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action($this->core->plugin_prefix('settings_'.$tab_id.'_rendering'));
 
             $form_action = 'admin-post.php';
@@ -812,7 +823,9 @@ if(!class_exists('XT_Framework_Settings')) {
             </form>
             <?php
 
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action($this->core->plugin_prefix('settings_rendered'), $tab_id);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action($this->core->plugin_prefix('settings_'.$tab_id.'_rendered'));
         }
 
@@ -862,6 +875,7 @@ if(!class_exists('XT_Framework_Settings')) {
             if(file_exists(XTFW_DIR_SETTINGS."/fields/".$field_filename.".php")) {
 	            include XTFW_DIR_SETTINGS."/fields/".$field_filename.".php";
             }else {
+	            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
 	            do_action( $this->core->plugin_prefix( 'settings_field_' ) . $field['type'], $field );
             }
         }
@@ -1069,7 +1083,9 @@ if(!class_exists('XT_Framework_Settings')) {
             $tab_id = $this->get_current_setting_tab_id();
             $fields = $this->get_setting_tab_fields($tab_id, false, true);
 
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action($this->core->plugin_prefix('settings_saving'), $tab_id);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
             do_action($this->core->plugin_prefix('settings_'.$tab_id.'_saving'));
 
             // Save the settings
@@ -1079,7 +1095,9 @@ if(!class_exists('XT_Framework_Settings')) {
 
                 $this->core->plugin_notices()->add_success_message( esc_html__('Settings saved successfully!', 'xt-framework') );
 
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
                 do_action($this->core->plugin_prefix('settings_saved'), $tab_id);
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
                 do_action($this->core->plugin_prefix('settings_'.$tab_id.'_saved'));
 
                 $this->core->transient()->delete('settings_css_output');
@@ -1260,6 +1278,7 @@ if(!class_exists('XT_Framework_Settings')) {
                  *
                  * @since 1.0.0
                  */
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
                 $value = apply_filters( $this->core->plugin_prefix('settings_sanitize_option'), $value, $field, $raw_value );
 
                 /**
@@ -1267,6 +1286,7 @@ if(!class_exists('XT_Framework_Settings')) {
                  *
                  * @since 1.0.0
                  */
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Named after the plugin's own prefixed option.
                 $value = apply_filters( $this->core->plugin_prefix("settings_sanitize_option_$option_name"), $value, $field, $raw_value );
 
                 /**
@@ -1274,6 +1294,7 @@ if(!class_exists('XT_Framework_Settings')) {
                  *
                  * @since 1.0.0
                  */
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Prefixed with the plugin's own prefix.
                 $value = apply_filters( $this->core->plugin_prefix("settings_sanitize_option_type_$option_type"), $value, $field, $raw_value );
 
 
@@ -1495,6 +1516,7 @@ if(!class_exists('XT_Framework_Settings')) {
                     $option_value = !empty($field['default']) ? $field['default'] : $default;
                 }
 
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Named after the plugin's own prefixed option.
                 return apply_filters( $option_name, $option_value, $option_name );
             });
 
@@ -1597,7 +1619,8 @@ if(!class_exists('XT_Framework_Settings')) {
                     'xt-jquery-select2',
                     'xt-jquery-inline-confirm'
                 ),
-                XTFW_VERSION
+                XTFW_VERSION,
+                false
             );
 
             wp_localize_script(
@@ -1616,7 +1639,7 @@ if(!class_exists('XT_Framework_Settings')) {
             $css = $this->get_settings_css_output(true);
 
             if(!empty($css)) {
-                wp_add_inline_style($handle, $css);
+                wp_add_inline_style($handle, xtfw_esc_css( $css ));
             }
 
         }
@@ -1634,4 +1657,10 @@ if(!class_exists('XT_Framework_Settings')) {
             <?php
 		}
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Settings', false ) ) {
+    	class_alias( 'XTFW_Settings', 'XT_Framework_Settings' );
+    }
+    // xtfw-legacy-alias:end
 }

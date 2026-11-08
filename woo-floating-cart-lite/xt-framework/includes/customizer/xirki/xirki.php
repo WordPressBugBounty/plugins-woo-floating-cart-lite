@@ -74,16 +74,16 @@ new Xirki_L10n();
 // Include deprecated functions & methods.
 require_once wp_normalize_path( dirname( __FILE__ ) . '/deprecated/deprecated.php' ); // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude
 
-// Include the ariColor library.
+// Include the Xirki_AriColor library.
 require_once wp_normalize_path( dirname( __FILE__ ) . '/lib/class-aricolor.php' ); // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude
 
 // Add an empty config for global fields.
 Xirki::add_config( '' );
 
-$custom_config_path = dirname( __FILE__ ) . '/custom-config.php';
-$custom_config_path = wp_normalize_path( $custom_config_path );
-if ( file_exists( $custom_config_path ) ) {
-	require_once $custom_config_path; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude
+$xirki_custom_config_path = dirname( __FILE__ ) . '/custom-config.php';
+$xirki_custom_config_path = wp_normalize_path( $xirki_custom_config_path );
+if ( file_exists( $xirki_custom_config_path ) ) {
+	require_once $xirki_custom_config_path; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude
 }
 
 // Add upgrade notifications.

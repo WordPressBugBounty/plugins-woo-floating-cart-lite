@@ -3,17 +3,17 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! class_exists( 'XT_Framework_Module' ) ) {
+if ( ! class_exists( 'XTFW_Module' ) ) {
 
     /**
      * Class that takes care of rendering common message blocks
      *
      * @since      1.0.0
-     * @package    XT_Framework
-     * @subpackage XT_Framework/includes
+     * @package    XTFW_Framework
+     * @subpackage XTFW_Framework/includes
      * @author     XplodedThemes
      */
-    abstract class XT_Framework_Module {
+    abstract class XTFW_Module {
 
         // Hold the class instance.
         private static $instances = array();
@@ -26,7 +26,7 @@ if ( ! class_exists( 'XT_Framework_Module' ) ) {
          *
          * @since    1.0.0
          * @access   public
-         * @var      XT_Framework    core    Core Class
+         * @var      XTFW_Framework    core    Core Class
          */
         public $core;
 
@@ -46,7 +46,7 @@ if ( ! class_exists( 'XT_Framework_Module' ) ) {
         protected $file;
 
         /**
-         * @var XT_Framework_Customizer  customizer    Customizer Class
+         * @var XTFW_Customizer  customizer    Customizer Class
          */
         protected $customizer;
 
@@ -72,7 +72,7 @@ if ( ! class_exists( 'XT_Framework_Module' ) ) {
         private function init_customizer() {
 
             if (empty($this->customizer) && has_filter($this->prefix('customizer_fields'))) {
-                $this->customizer = new XT_Framework_Customizer($this->core, $this);
+                $this->customizer = new XTFW_Customizer($this->core, $this);
             }
         }
 
@@ -257,4 +257,10 @@ if ( ! class_exists( 'XT_Framework_Module' ) ) {
 
         final public function __clone(){}
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Module', false ) ) {
+    	class_alias( 'XTFW_Module', 'XT_Framework_Module' );
+    }
+    // xtfw-legacy-alias:end
 }

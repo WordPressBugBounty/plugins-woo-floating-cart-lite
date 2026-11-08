@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if(!class_exists('XT_Framework_Framework_Tabs')) {
+if(!class_exists('XTFW_Framework_Tabs')) {
 
     /**
      * The admin-specific functionality of the plugin.
@@ -11,10 +11,10 @@ if(!class_exists('XT_Framework_Framework_Tabs')) {
      * Defines the plugin name, version, and two examples hooks for how to
      * enqueue the admin-specific stylesheet and JavaScript.
      *
-     * @package    XT_Framework_Framework_Tabs
+     * @package    XTFW_Framework_Tabs
      * @author     XplodedThemes
      */
-    class XT_Framework_Framework_Tabs extends XT_Framework_Admin_Tabs {
+    class XTFW_Framework_Tabs extends XTFW_Admin_Tabs {
 
         public static $_instance;
 
@@ -42,18 +42,22 @@ if(!class_exists('XT_Framework_Framework_Tabs')) {
 
         public function set_active_tab() {
 
-            if ( ! empty( $_GET['page'] ) && $_GET['page'] !== $this->core->framework_slug() ) {
-                $page = sanitize_text_field($_GET['page']);
-                $tab_id = str_replace( $this->core->framework_slug() . '-', '', $page );
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin routing.
+            $current_page = isset( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+            $current_tab  = isset( $_GET['tab'] ) && is_scalar( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+            if ( ! empty( $current_page ) && $current_page !== $this->core->framework_slug() ) {
+                $tab_id = str_replace( $this->core->framework_slug() . '-', '', $current_page );
                 if ( $this->tab_exists( $tab_id ) ) {
                     $this->active_tab = $tab_id;
                 }
             }
 
-            if ( ! empty( $_GET['page'] ) && $_GET['page'] === $this->core->framework_slug() ) {
+            if ( ! empty( $current_page ) && $current_page === $this->core->framework_slug() ) {
 
-                if ( ! empty( $_GET['tab'] ) ) {
-                    $tab_id = sanitize_text_field( $_GET['tab'] );
+                if ( ! empty( $current_tab ) ) {
+                    $tab_id = $current_tab;
                     if ( $this->tab_exists( $tab_id ) ) {
                         $this->active_tab = $tab_id;
                     }
@@ -106,7 +110,11 @@ if(!class_exists('XT_Framework_Framework_Tabs')) {
         }
 
         public function is_admin_tabs_page() {
-            return ! empty( $_GET['page'] ) && ( ( $_GET['page'] === $this->core->framework_slug() ) || $_GET['page'] === $this->core->framework_slug( $this->active_tab ) );
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin routing.
+            $current_page = isset( $_GET['page'] ) && is_scalar( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+            // phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+            return ! empty( $current_page ) && ( ( $current_page === $this->core->framework_slug() ) || $current_page === $this->core->framework_slug( $this->active_tab ) );
         }
 
         public function tabs_admin_menu() {
@@ -120,7 +128,15 @@ if(!class_exists('XT_Framework_Framework_Tabs')) {
             ), $this->core->framework_icon());
 
             // Add menu divider
-            add_submenu_page($this->core->framework_slug(), '', '<span class="xtfw-admin-menu-divider"></span>', $this->capability, '#', null, 0);
+            $divider_hook = add_submenu_page($this->core->framework_slug(), '', '<span class="xtfw-admin-menu-divider"></span>', $this->capability, $this->core->framework_slug() . '-divider', '__return_null', 0);
+
+            if ( $divider_hook ) {
+                // The divider is not a real screen: send anyone who clicks it to the XT Plugins dashboard.
+                add_action( 'load-' . $divider_hook, function () {
+                    wp_safe_redirect( $this->core->framework_admin_url() );
+                    exit;
+                } );
+            }
 
             foreach ( $this->tabs as $tab ) {
 
@@ -143,7 +159,9 @@ if(!class_exists('XT_Framework_Framework_Tabs')) {
                     if ( ! $redirect ) {
                         $this->tabs_admin_page();
                     } else {
+                        // phpcs:disable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Opens the tab's link, which can be external (e.g. xplodedthemes.com/support).
                         wp_redirect( $redirect );
+                        // phpcs:enable WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
                         exit;
                     }
                 }, $order );
@@ -240,12 +258,12 @@ if(!class_exists('XT_Framework_Framework_Tabs')) {
         }
 
         /**
-         * Main XT_Framework_Framework_Tabs Instance
+         * Main XTFW_Framework_Tabs Instance
          *
-         * Ensures only one instance of XT_Framework_Framework_Tabs is loaded or can be loaded.
+         * Ensures only one instance of XTFW_Framework_Tabs is loaded or can be loaded.
          *
-         * @return XT_Framework_Framework_Tabs instance
-         * @see XT_Framework_Framework_Tabs()
+         * @return XTFW_Framework_Tabs instance
+         * @see XTFW_Framework_Tabs()
          * @since 1.0.0
          * @static
          */
@@ -258,4 +276,10 @@ if(!class_exists('XT_Framework_Framework_Tabs')) {
         } // End instance()
 
     }
+
+    // xtfw-legacy-alias:start -- Keeps the pre-2.5.19 class name working for plugins bundling an older copy.
+    if ( ! class_exists( 'XT_Framework_Framework_Tabs', false ) ) {
+    	class_alias( 'XTFW_Framework_Tabs', 'XT_Framework_Framework_Tabs' );
+    }
+    // xtfw-legacy-alias:end
 }

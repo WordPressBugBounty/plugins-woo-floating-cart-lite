@@ -120,7 +120,7 @@ class Xirki_Field_Repeater extends Xirki_Field {
 							break;
 						case 'color':
 							if ( $subfield_value ) {
-								$color_obj      = ariColor::newColor( $subfield_value );
+								$color_obj      = Xirki_AriColor::newColor( $subfield_value );
 								$subfield_value = $color_obj->toCSS( $color_obj->mode );
 							}
 							break;
