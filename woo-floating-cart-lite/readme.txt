@@ -7,7 +7,7 @@ Author URI: https://www.xplodedthemes.com
 Tags: floating cart, woocommerce side cart, ajax add to cart, mini cart, upsell
 Requires at least: 4.6
 Tested up to: 7.1
-Stable tag: 2.8.15
+Stable tag: 2.8.16
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -105,6 +105,9 @@ Installing "Floating Cart for WooCommerce" can be done by following these steps:
 3. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+#### V.2.8.16 - 2026-11-08
+- **update**: Faster page loads: the body scroll lock and the suggested products slider scripts now load in the footer instead of blocking the page head. The cart looks and behaves exactly as before
 
 #### V.2.8.15 - 2026-11-07
 - **new**: The cart now updates right away on stores using WooCommerce blocks. Products added with the block Add to cart buttons or removed from the Mini Cart block show in the floating cart without a page reload

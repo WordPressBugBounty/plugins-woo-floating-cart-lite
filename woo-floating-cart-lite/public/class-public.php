@@ -153,7 +153,8 @@ class XT_Woo_Floating_Cart_Public
     {
 
         if ($this->core->customizer()->get_option_bool('active_cart_body_lock_scroll', false)) {
-            wp_enqueue_script('xt-body-scroll-lock', $this->core->plugin_url('public') . 'assets/vendors/bodyScrollLock' . XTFW_SCRIPT_SUFFIX . '.js', array(), $this->core->plugin_version(), false);
+            // Footer: only used once the cart opens.
+            wp_enqueue_script('xt-body-scroll-lock', $this->core->plugin_url('public') . 'assets/vendors/bodyScrollLock' . XTFW_SCRIPT_SUFFIX . '.js', array(), $this->core->plugin_version(), true);
         }
 
         if (!$this->is_cart_page()) {
